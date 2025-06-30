@@ -1,0 +1,127 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# ===== DEPENDENCIES =====
+/node_modules
+**/node_modules/
+demo-server/node_modules/
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# ===== TESTING =====
+/coverage
+*.test.js
+*.test.ts
+*.test.tsx
+test-results/
+
+# ===== NEXT.JS =====
+/.next/
+/out/
+.next
+
+# ===== PRODUCTION BUILDS =====
+/build
+/dist
+
+# ===== ENVIRONMENT & CONFIG =====
+.env*
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+!.env.example
+.jigsawtechie-config.json
+
+# ===== SENSITIVE CONFIG FILES =====
+config.json
+secrets.json
+credentials.json
+auth-config.json
+
+# ===== VERCEL =====
+.vercel
+
+# ===== TYPESCRIPT =====
+*.tsbuildinfo
+next-env.d.ts
+
+# ===== IDE & EDITOR FILES =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.vscode/settings.json
+
+# ===== OS GENERATED FILES =====
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ===== LOGS =====
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+logs/
+*.log
+
+# ===== TEMPORARY FILES =====
+*.tmp
+*.temp
+temp/
+tmp/
+.cache/
+.tmp/
+
+# ===== BACKUP FILES =====
+*.bak
+*.backup
+
+# ===== DEMO & CLI SYSTEM =====
+demo-*.zip
+cli/logs/
+demo-deployments/
+demo-server/public/demos/
+demo-server/.next/
+demo-server/out/
+demo-server/node_modules/
+.jigsawtechie-config.json
+
+# ===== AI CONTEXT FILES =====
+foraug/
+
+# ===== CUSTOM DOCUMENTATION =====
+docs/
+*.md
+!README.md
+!LICENSE.md
+
+# ===== PROJECT SPECIFIC =====
+/static-preview.html
+/test-imports.js
+/test-tailwind.html
+*.test.html
+
+# ===== SECURITY =====
+*.pem
+*.key
+*.cert
+.env.local
+.env.production
+
+# ===== MISC =====
+*.pid
+*.seed
+*.pid.lock
