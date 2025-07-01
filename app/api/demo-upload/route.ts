@@ -5,13 +5,27 @@ import { join } from "path";
 import { existsSync } from "fs";
 import AdmZip from "adm-zip";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Initialize Supabase client with environment variable checks
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.warn("Supabase environment variables not found during build");
+}
+
+const supabase =
+  supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Supabase is available
+    if (!supabase) {
+      return NextResponse.json(
+        { error: "Service temporarily unavailable" },
+        { status: 503 }
+      );
+    }
+
     // Verify authentication
     const authHeader = request.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) {
