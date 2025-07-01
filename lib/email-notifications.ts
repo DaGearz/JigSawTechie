@@ -39,7 +39,7 @@ class MockEmailService implements EmailService {
 }
 
 // Resend email service implementation (uncomment when ready to use)
-import { Resend } from 'resend';
+import { Resend } from "resend";
 
 class ResendEmailService implements EmailService {
   private resend: Resend;
@@ -53,45 +53,47 @@ class ResendEmailService implements EmailService {
       const { error } = await this.resend.emails.send({
         from: `${data.fromName} <noreply@jigsawtechie.com>`,
         to: [`${data.toName} <${data.to}>`],
-        subject: data.isReply ? `Re: ${data.subject}` : `New Message: ${data.subject}`,
+        subject: data.isReply
+          ? `Re: ${data.subject}`
+          : `New Message: ${data.subject}`,
         html: this.generateEmailHTML(data),
       });
 
       if (error) {
-        console.error('Resend error:', error);
+        console.error("Resend error:", error);
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Email sending failed:', error);
+      console.error("Email sending failed:", error);
       return false;
     }
   }
-  
+
   private generateEmailHTML(data: EmailNotificationData): string {
     const priorityColor = {
-      low: '#6B7280',
-      normal: '#3B82F6',
-      high: '#F59E0B',
-      urgent: '#EF4444'
+      low: "#6B7280",
+      normal: "#3B82F6",
+      high: "#F59E0B",
+      urgent: "#EF4444",
     }[data.priority];
-    
+
     return `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>${data.isReply ? 'Reply' : 'New Message'} from ${data.fromName}</title>
+          <title>${data.isReply ? "Reply" : "New Message"} from ${data.fromName}</title>
         </head>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
             <h2 style="color: #1f2937; margin: 0 0 10px 0;">
-              ${data.isReply ? '💬 New Reply' : '📧 New Message'}
+              ${data.isReply ? "💬 New Reply" : "📧 New Message"}
             </h2>
             <p style="margin: 0; color: #6b7280;">
-              You have a ${data.isReply ? 'reply' : 'new message'} from ${data.fromName}
+              You have a ${data.isReply ? "reply" : "new message"} from ${data.fromName}
             </p>
           </div>
           
@@ -131,7 +133,6 @@ class ResendEmailService implements EmailService {
     `;
   }
 }
-*/
 
 // SendGrid email service implementation (alternative)
 /*

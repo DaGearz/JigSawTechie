@@ -126,3 +126,5 @@ archive/
 *.pid
 *.seed
 *.pid.lock
+
+.vercel
