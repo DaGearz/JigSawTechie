@@ -104,6 +104,7 @@ foraug/
 
 # ===== CUSTOM DOCUMENTATION =====
 docs/
+archive/
 *.md
 !README.md
 !LICENSE.md

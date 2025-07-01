@@ -21,6 +21,16 @@ export interface Project {
   preview_url?: string;
   preview_password?: string;
   live_url?: string;
+  demo_url?: string;
+  demo_password?: string;
+  demo_status?:
+    | "not_ready"
+    | "ready"
+    | "in_review"
+    | "approved"
+    | "needs_changes";
+  demo_notes?: string;
+  demo_updated_at?: string;
   start_date?: string;
   target_completion?: string;
   actual_completion?: string;
@@ -383,6 +393,73 @@ export const authService = {
     };
   },
 
+  // Convert project request to project (admin only)
+  async convertProjectRequestToProject(
+    requestId: string,
+    projectName?: string
+  ): Promise<{
+    project: Project;
+    client: User;
+  }> {
+    const isAdmin = await this.isAdmin();
+    if (!isAdmin) throw new Error("Admin access required");
+
+    // Get the project request details
+    const { data: request, error: requestError } = await supabase
+      .from("project_requests")
+      .select("*")
+      .eq("id", requestId)
+      .single();
+
+    if (requestError || !request) {
+      throw new Error("Project request not found");
+    }
+
+    // Get the client details
+    const { data: client, error: clientError } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", request.client_id)
+      .single();
+
+    if (clientError || !client) {
+      throw new Error("Client not found");
+    }
+
+    // Create the project
+    const { data: project, error: projectError } = await supabase
+      .from("projects")
+      .insert({
+        client_id: request.client_id,
+        name: projectName || request.title,
+        description: request.description,
+        status: "planning",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (projectError || !project) {
+      throw new Error(`Failed to create project: ${projectError?.message}`);
+    }
+
+    // Update project request status to converted and link to project
+    await supabase
+      .from("project_requests")
+      .update({
+        status: "converted",
+        converted_project_id: project.id,
+        reviewed_at: new Date().toISOString(),
+      })
+      .eq("id", requestId);
+
+    return {
+      project,
+      client,
+    };
+  },
+
   // Get all projects (for admin)
   async getAllProjects(): Promise<Project[]> {
     const isAdmin = await this.isAdmin();
@@ -393,7 +470,7 @@ export const authService = {
       .select(
         `
         *,
-        client:users(name, email, company)
+        client:users!client_id(name, email, company)
       `
       )
       .order("created_at", { ascending: false });
@@ -966,5 +1043,132 @@ export const authService = {
     }
 
     return { hasAccess: false };
+  },
+
+  // ===== DEMO MANAGEMENT FUNCTIONS =====
+
+  // Update project demo settings (admin only)
+  async updateProjectDemo(
+    projectId: string,
+    demoData: {
+      demo_url?: string;
+      demo_password?: string;
+      demo_status?:
+        | "not_ready"
+        | "ready"
+        | "in_review"
+        | "approved"
+        | "needs_changes";
+      demo_notes?: string;
+    }
+  ): Promise<Project> {
+    const isAdmin = await this.isAdmin();
+    if (!isAdmin) throw new Error("Admin access required");
+
+    const { data, error } = await supabase
+      .from("projects")
+      .update({
+        ...demoData,
+        demo_updated_at: new Date().toISOString(),
+      })
+      .eq("id", projectId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update demo: ${error.message}`);
+    }
+
+    return data;
+  },
+
+  // Generate demo password
+  generateDemoPassword(): string {
+    return "demo_" + Math.random().toString(36).substring(2, 10);
+  },
+
+  // Generate demo auth token for subdomain access
+  async generateDemoAuthToken(userId: string): Promise<string> {
+    try {
+      const response = await fetch("/api/demo/generate-token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.getToken()}`,
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate demo token");
+      }
+
+      const data = await response.json();
+      return data.token;
+    } catch (error) {
+      console.error("Error generating demo token:", error);
+      throw error;
+    }
+  },
+
+  // Get demo URL for project
+  getDemoUrl(projectId: string): string {
+    const demoBaseUrl =
+      process.env.NEXT_PUBLIC_DEMO_URL || "https://demo.jigsawtechie.com";
+    return `${demoBaseUrl}/${projectId}`;
+  },
+
+  // Check if user has demo access to project
+  async hasProjectDemoAccess(
+    projectId: string,
+    userId?: string
+  ): Promise<boolean> {
+    const currentUser = userId ? { id: userId } : await this.getCurrentUser();
+    if (!currentUser) return false;
+
+    const { data, error } = await supabase
+      .from("projects")
+      .select("client_id, demo_status")
+      .eq("id", projectId)
+      .single();
+
+    if (error || !data) return false;
+
+    // Client has access to their own project demos
+    if (data.client_id === currentUser.id) return true;
+
+    // Check if user has team access (future feature)
+    // const { data: teamAccess } = await supabase
+    //   .from("project_team_access")
+    //   .select("can_view_demo")
+    //   .eq("project_id", projectId)
+    //   .eq("user_id", currentUser.id)
+    //   .single();
+
+    // return teamAccess?.can_view_demo || false;
+
+    return false;
+  },
+
+  // Log demo activity
+  async logDemoActivity(
+    projectId: string,
+    activityType:
+      | "demo_accessed"
+      | "feedback_submitted"
+      | "demo_approved"
+      | "demo_rejected",
+    details?: any
+  ): Promise<void> {
+    const user = await this.getCurrentUser();
+    if (!user) return;
+
+    await supabase.from("demo_activity").insert({
+      project_id: projectId,
+      user_id: user.id,
+      activity_type: activityType,
+      details,
+      created_at: new Date().toISOString(),
+    });
   },
 };
