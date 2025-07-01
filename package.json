@@ -11,17 +11,22 @@
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
     "@supabase/supabase-js": "^2.49.8",
+    "@types/adm-zip": "^0.5.7",
+    "@types/mime-types": "^3.0.1",
+    "adm-zip": "^0.5.16",
     "archiver": "^7.0.1",
     "dotenv": "^16.5.0",
     "form-data": "^4.0.3",
     "framer-motion": "^12.12.2",
     "fs-extra": "^11.3.0",
     "lucide-react": "^0.511.0",
+    "mime-types": "^3.0.1",
     "next": "15.3.2",
     "node-fetch": "^3.3.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.56.4",
+    "resend": "^4.6.0",
     "zod": "^3.25.28"
   },
   "devDependencies": {

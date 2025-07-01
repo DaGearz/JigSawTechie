@@ -27,11 +27,18 @@ try {
 }
 
 const CONFIG_FILE = ".jigsawtechie-config.json";
-const DEMO_SERVER_URL =
-  "https://demo-server-jd7ue3fyo-todd-williams-projects-28975c01.vercel.app";
 
-// Alternative: Use the main JigsawTechie server for demo uploads
+// Use the main JigsawTechie server for demo uploads (more reliable than separate demo server)
 const MAIN_SERVER_URL = "https://jigsaw-techie-website.vercel.app";
+const LOCAL_SERVER_URL = "http://localhost:3000";
+
+// Determine which server to use based on environment
+function getServerUrl() {
+  // Check if we're in development by trying to detect local server
+  const isDev =
+    process.env.NODE_ENV === "development" || process.argv.includes("--local");
+  return isDev ? LOCAL_SERVER_URL : MAIN_SERVER_URL;
+}
 
 async function getAdminToken() {
   try {
@@ -102,7 +109,8 @@ async function deployDemo() {
     formData.append("file", fs.createReadStream(zipPath));
     formData.append("projectId", projectId);
 
-    const response = await fetch(`${DEMO_SERVER_URL}/api/upload`, {
+    const serverUrl = getServerUrl();
+    const response = await fetch(`${serverUrl}/api/demo-upload`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -122,8 +130,11 @@ async function deployDemo() {
     const result = await response.json();
 
     console.log("✅ Demo deployed successfully!");
-    console.log(`🌐 Demo URL: ${DEMO_SERVER_URL}/${projectId}`);
-    console.log(`📊 Upload size: ${(result.size / 1024).toFixed(2)} KB`);
+    console.log(`🌐 Demo URL: ${serverUrl}/demos/${projectId}`);
+    console.log(`📊 Upload size: ${result.uploadSize || "Unknown"}`);
+    if (result.demoUrl) {
+      console.log(`🔗 Direct demo link: ${result.demoUrl}`);
+    }
   } catch (error) {
     console.error("❌ Deployment failed:", error.message);
     process.exit(1);

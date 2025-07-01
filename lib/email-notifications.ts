@@ -10,7 +10,7 @@ interface EmailNotificationData {
   message: string;
   threadId: string;
   isReply: boolean;
-  priority: 'low' | 'normal' | 'high' | 'urgent';
+  priority: "low" | "normal" | "high" | "urgent";
 }
 
 interface EmailService {
@@ -20,48 +20,49 @@ interface EmailService {
 // Mock email service - replace with your actual email provider
 class MockEmailService implements EmailService {
   async sendEmail(data: EmailNotificationData): Promise<boolean> {
-    console.log('📧 Email Notification (Mock):', {
+    console.log("📧 Email Notification (Mock):", {
       to: `${data.toName} <${data.to}>`,
       from: `${data.fromName} <${data.from}>`,
-      subject: data.isReply ? `Re: ${data.subject}` : `New Message: ${data.subject}`,
+      subject: data.isReply
+        ? `Re: ${data.subject}`
+        : `New Message: ${data.subject}`,
       priority: data.priority,
       threadId: data.threadId,
     });
-    
+
     // Simulate email sending delay
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     // Mock success (in production, this would be actual email sending)
     return true;
   }
 }
 
 // Resend email service implementation (uncomment when ready to use)
-/*
+import { Resend } from 'resend';
+
 class ResendEmailService implements EmailService {
-  private apiKey: string;
-  
+  private resend: Resend;
+
   constructor(apiKey: string) {
-    this.apiKey = apiKey;
+    this.resend = new Resend(apiKey);
   }
-  
+
   async sendEmail(data: EmailNotificationData): Promise<boolean> {
     try {
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: `${data.fromName} <noreply@jigsawtechie.com>`,
-          to: [`${data.toName} <${data.to}>`],
-          subject: data.isReply ? `Re: ${data.subject}` : `New Message: ${data.subject}`,
-          html: this.generateEmailHTML(data),
-        }),
+      const { error } = await this.resend.emails.send({
+        from: `${data.fromName} <noreply@jigsawtechie.com>`,
+        to: [`${data.toName} <${data.to}>`],
+        subject: data.isReply ? `Re: ${data.subject}` : `New Message: ${data.subject}`,
+        html: this.generateEmailHTML(data),
       });
-      
-      return response.ok;
+
+      if (error) {
+        console.error('Resend error:', error);
+        return false;
+      }
+
+      return true;
     } catch (error) {
       console.error('Email sending failed:', error);
       return false;
@@ -179,21 +180,24 @@ class SendGridEmailService implements EmailService {
 // Email notification service
 export class EmailNotificationService {
   private emailService: EmailService;
-  
+
   constructor() {
-    // Initialize with mock service by default
-    // In production, replace with actual email service:
-    // this.emailService = new ResendEmailService(process.env.RESEND_API_KEY!);
-    // or
-    // this.emailService = new SendGridEmailService(process.env.SENDGRID_API_KEY!);
-    this.emailService = new MockEmailService();
+    // Use Resend if API key is available, otherwise fall back to mock
+    const resendApiKey = process.env.RESEND_API_KEY;
+
+    if (resendApiKey) {
+      this.emailService = new ResendEmailService(resendApiKey);
+    } else {
+      console.warn("RESEND_API_KEY not found, using mock email service");
+      this.emailService = new MockEmailService();
+    }
   }
-  
+
   async notifyNewMessage(data: EmailNotificationData): Promise<boolean> {
     try {
       return await this.emailService.sendEmail(data);
     } catch (error) {
-      console.error('Failed to send email notification:', error);
+      console.error("Failed to send email notification:", error);
       return false;
     }
   }
@@ -212,7 +216,7 @@ export async function sendMessageNotification(
   message: string,
   threadId: string,
   isReply: boolean = false,
-  priority: 'low' | 'normal' | 'high' | 'urgent' = 'normal'
+  priority: "low" | "normal" | "high" | "urgent" = "normal"
 ): Promise<boolean> {
   return await emailNotificationService.notifyNewMessage({
     to: recipientEmail,
