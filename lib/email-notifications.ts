@@ -38,7 +38,7 @@ class MockEmailService implements EmailService {
   }
 }
 
-// Resend email service implementation (uncomment when ready to use)
+// Resend email service implementation
 import { Resend } from "resend";
 
 class ResendEmailService implements EmailService {
