@@ -44,7 +44,6 @@ const Navigation = () => {
   const navItems = [
     { href: "/", label: "Home" },
     { href: "/templates", label: "Templates" },
-    { href: "/services", label: "Services" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
   ];
@@ -85,8 +84,8 @@ const Navigation = () => {
                         user?.role === "admin"
                           ? "/admin"
                           : user?.id
-                          ? `/dashboard/${user.id}`
-                          : "/login"
+                            ? `/dashboard/${user.id}`
+                            : "/login"
                       }
                       className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
                       onClick={() => {
@@ -98,8 +97,8 @@ const Navigation = () => {
                           user?.role === "admin"
                             ? "/admin"
                             : user?.id
-                            ? `/dashboard/${user.id}`
-                            : "/login"
+                              ? `/dashboard/${user.id}`
+                              : "/login"
                         );
                       }}
                     >
@@ -199,8 +198,8 @@ const Navigation = () => {
                             user?.role === "admin"
                               ? "/admin"
                               : user?.id
-                              ? `/dashboard/${user.id}`
-                              : "/login"
+                                ? `/dashboard/${user.id}`
+                                : "/login"
                           }
                           className="flex items-center space-x-2 text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
                           onClick={() => {
@@ -215,8 +214,8 @@ const Navigation = () => {
                               user?.role === "admin"
                                 ? "/admin"
                                 : user?.id
-                                ? `/dashboard/${user.id}`
-                                : "/login"
+                                  ? `/dashboard/${user.id}`
+                                  : "/login"
                             );
                             setIsOpen(false);
                           }}
