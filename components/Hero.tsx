@@ -52,10 +52,13 @@ const Hero = () => {
                 transition={{ duration: 0.6, delay: 0.6 }}
                 className="text-xl text-gray-600 leading-relaxed"
               >
-                We create stunning, custom websites and tech solutions that help
-                your business establish a powerful online presence and drive
-                growth. From concept to launch, we&apos;re your trusted
-                technology partner.
+                Get a professional website that actually converts visitors into
+                customers. We build custom websites and provide complete tech
+                solutions that grow your business.
+                <span className="font-semibold text-primary-600">
+                  {" "}
+                  Free consultation included.
+                </span>
               </motion.p>
             </div>
 
@@ -67,33 +70,58 @@ const Hero = () => {
             >
               <Link
                 href="/quote"
-                className="btn-primary inline-flex items-center justify-center"
+                className="btn-primary inline-flex items-center justify-center transform hover:scale-105 transition-transform"
               >
-                Get Your Free Quote
+                🚀 Get Free Quote & Strategy Call
                 <ArrowRight size={20} className="ml-2" />
               </Link>
               <Link
                 href="/templates"
                 className="btn-secondary inline-flex items-center justify-center"
               >
-                View Templates
+                👀 See Live Examples
               </Link>
+            </motion.div>
+
+            {/* Trust Indicators */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.0 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-6 text-sm text-gray-600"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-green-500 text-lg">✓</span>
+                <span>Free consultation & strategy call</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-green-500 text-lg">✓</span>
+                <span>24-hour response guarantee</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-green-500 text-lg">✓</span>
+                <span>100% satisfaction rate</span>
+              </div>
             </motion.div>
 
             {/* Stats */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 1.0 }}
-              className="grid grid-cols-2 gap-8 pt-8 border-t border-gray-200"
+              transition={{ duration: 0.6, delay: 1.2 }}
+              className="grid grid-cols-3 gap-8 pt-8 border-t border-gray-200"
             >
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">100%</div>
-                <div className="text-sm text-gray-600">Client Satisfaction</div>
+                <div className="text-2xl font-bold text-primary-600">50+</div>
+                <div className="text-sm text-gray-600">Happy Clients</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">24/7</div>
-                <div className="text-sm text-gray-600">Support Available</div>
+                <div className="text-2xl font-bold text-primary-600">100%</div>
+                <div className="text-sm text-gray-600">Satisfaction Rate</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary-600">24hr</div>
+                <div className="text-sm text-gray-600">Response Time</div>
               </div>
             </motion.div>
           </motion.div>
