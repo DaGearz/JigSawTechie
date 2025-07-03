@@ -1410,7 +1410,7 @@ export default function AdminDashboard() {
                               ) {
                                 try {
                                   setLoading(true);
-                                  await authService.createProjectFromRequest(
+                                  await authService.convertProjectRequestToProject(
                                     request.id
                                   );
                                   alert("Project created successfully!");
