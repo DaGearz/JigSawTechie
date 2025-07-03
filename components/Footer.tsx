@@ -24,10 +24,13 @@ const Footer = () => {
             </p>
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
-                <Mail size={16} className="text-accent-400" />
-                <span className="text-gray-300">
+                <Mail size={16} className="text-accent-400 flex-shrink-0" />
+                <a
+                  href="mailto:twilliams@jigsawtechie.com"
+                  className="text-gray-300 hover:text-accent-400 transition-colors break-words"
+                >
                   twilliams@jigsawtechie.com
-                </span>
+                </a>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin size={16} className="text-accent-400" />

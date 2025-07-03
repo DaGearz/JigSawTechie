@@ -145,7 +145,7 @@ const CTA = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <a
                 href="mailto:twilliams@jigsawtechie.com"
-                className="text-green-400 hover:text-green-300 transition-colors"
+                className="text-green-400 hover:text-green-300 transition-colors break-words text-center sm:text-left"
               >
                 twilliams@jigsawtechie.com
               </a>

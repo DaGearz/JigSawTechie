@@ -149,7 +149,7 @@ export default function ContactForm() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
-                  className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow text-center"
+                  className="contact-card"
                 >
                   <div className="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                     <info.icon className="w-8 h-8 text-primary-600" />
@@ -160,12 +160,12 @@ export default function ContactForm() {
                   {info.action ? (
                     <a
                       href={info.action}
-                      className="text-xl font-bold text-primary-600 hover:text-primary-700 transition-colors block mb-2"
+                      className="text-lg md:text-xl font-bold text-primary-600 hover:text-primary-700 transition-colors block mb-2 email-text"
                     >
                       {info.details}
                     </a>
                   ) : (
-                    <p className="text-xl font-bold text-primary-600 mb-2">
+                    <p className="text-lg md:text-xl font-bold text-primary-600 mb-2 email-text">
                       {info.details}
                     </p>
                   )}
