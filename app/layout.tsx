@@ -5,6 +5,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import Script from "next/script";
 import { GA_TRACKING_ID } from "@/lib/gtag";
+import PerformanceMonitor from "@/components/PerformanceMonitor";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -110,6 +111,7 @@ export default function RootLayout({
         `}
       </Script>
       <body className={`${inter.className} antialiased bg-white text-gray-900`}>
+        <PerformanceMonitor />
         <Navigation />
         <main className="min-h-screen">{children}</main>
         <Footer />

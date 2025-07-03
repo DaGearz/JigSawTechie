@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { quoteService } from "@/lib/supabase";
 import { trackQuoteSubmission } from "@/lib/gtag";
+import { trackBusinessEvent } from "@/components/GoogleAnalytics";
 
 export default function Quote() {
   const [formData, setFormData] = useState({
