@@ -1,6 +1,6 @@
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
-import Services from "@/components/Services";
+import TechServices from "@/components/TechServices";
 import Pricing from "@/components/Pricing";
 import Testimonials from "@/components/Testimonials";
 import CTA from "@/components/CTA";
@@ -10,7 +10,7 @@ export default function Home() {
     <>
       <Hero />
       <Features />
-      <Services />
+      <TechServices />
       <Pricing />
       <Testimonials />
       <CTA />

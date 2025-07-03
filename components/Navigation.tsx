@@ -43,7 +43,38 @@ const Navigation = () => {
 
   const navItems = [
     { href: "/", label: "Home" },
-    { href: "/templates", label: "Templates" },
+    {
+      href: "/services",
+      label: "Services",
+      dropdown: [
+        {
+          href: "/services/websites",
+          label: "🌐 Website Development",
+          description: "Custom websites & e-commerce",
+        },
+        {
+          href: "/services/apps",
+          label: "📱 App Development",
+          description: "Mobile & web applications",
+        },
+        {
+          href: "/services/cloud",
+          label: "☁️ Cloud Solutions",
+          description: "Infrastructure & DevOps",
+        },
+        {
+          href: "/services/support",
+          label: "🛠️ IT Support",
+          description: "Ongoing tech support",
+        },
+        {
+          href: "/services/data",
+          label: "📊 Data Analytics",
+          description: "Business intelligence",
+        },
+      ],
+    },
+    { href: "/portfolio", label: "Portfolio" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
   ];

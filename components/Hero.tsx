@@ -41,9 +41,9 @@ const Hero = () => {
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight"
               >
-                Professional{" "}
-                <span className="gradient-text">Web Development</span> for Your
-                Business
+                Complete{" "}
+                <span className="gradient-text">Technology Solutions</span> for
+                Your Business
               </motion.h1>
 
               <motion.p
@@ -52,9 +52,10 @@ const Hero = () => {
                 transition={{ duration: 0.6, delay: 0.6 }}
                 className="text-xl text-gray-600 leading-relaxed"
               >
-                Get a professional website that actually converts visitors into
-                customers. We build custom websites and provide complete tech
-                solutions that grow your business.
+                From websites to cloud infrastructure, we provide comprehensive
+                technology services that power your business growth. Get
+                professional solutions that actually convert visitors into
+                customers and streamline your operations.
                 <span className="font-semibold text-primary-600">
                   {" "}
                   Free consultation included.
