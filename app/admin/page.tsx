@@ -1203,12 +1203,13 @@ export default function AdminDashboard() {
                                             project.status === "planning"
                                               ? "bg-blue-100 text-blue-800"
                                               : project.status === "development"
-                                              ? "bg-yellow-100 text-yellow-800"
-                                              : project.status === "review"
-                                              ? "bg-purple-100 text-purple-800"
-                                              : project.status === "completed"
-                                              ? "bg-green-100 text-green-800"
-                                              : "bg-red-100 text-red-800"
+                                                ? "bg-yellow-100 text-yellow-800"
+                                                : project.status === "review"
+                                                  ? "bg-purple-100 text-purple-800"
+                                                  : project.status ===
+                                                      "completed"
+                                                    ? "bg-green-100 text-green-800"
+                                                    : "bg-red-100 text-red-800"
                                           }`}
                                         >
                                           {project.status}
@@ -1282,12 +1283,12 @@ export default function AdminDashboard() {
                               request.status === "pending"
                                 ? "bg-yellow-100 text-yellow-800"
                                 : request.status === "reviewing"
-                                ? "bg-blue-100 text-blue-800"
-                                : request.status === "approved"
-                                ? "bg-green-100 text-green-800"
-                                : request.status === "declined"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-purple-100 text-purple-800"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : request.status === "approved"
+                                    ? "bg-green-100 text-green-800"
+                                    : request.status === "declined"
+                                      ? "bg-red-100 text-red-800"
+                                      : "bg-purple-100 text-purple-800"
                             }`}
                           >
                             {request.status}
@@ -1297,10 +1298,10 @@ export default function AdminDashboard() {
                               request.priority === "urgent"
                                 ? "bg-red-100 text-red-800"
                                 : request.priority === "high"
-                                ? "bg-orange-100 text-orange-800"
-                                : request.priority === "normal"
-                                ? "bg-gray-100 text-gray-800"
-                                : "bg-gray-100 text-gray-600"
+                                  ? "bg-orange-100 text-orange-800"
+                                  : request.priority === "normal"
+                                    ? "bg-gray-100 text-gray-800"
+                                    : "bg-gray-100 text-gray-600"
                             }`}
                           >
                             {request.priority} priority
@@ -1407,10 +1408,25 @@ export default function AdminDashboard() {
                               if (
                                 confirm("Convert this request to a project?")
                               ) {
-                                // TODO: Implement project creation from request
-                                alert(
-                                  "Project creation from request coming soon!"
-                                );
+                                try {
+                                  setIsLoading(true);
+                                  await authService.createProjectFromRequest(
+                                    request.id
+                                  );
+                                  alert("Project created successfully!");
+                                  // Refresh the data
+                                  await loadData();
+                                } catch (error) {
+                                  console.error(
+                                    "Error creating project:",
+                                    error
+                                  );
+                                  alert(
+                                    `Failed to create project: ${error instanceof Error ? error.message : "Unknown error"}`
+                                  );
+                                } finally {
+                                  setIsLoading(false);
+                                }
                               }
                             }}
                             className="flex items-center space-x-1 bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700 transition-colors"
@@ -1537,10 +1553,10 @@ export default function AdminDashboard() {
                                   project.demo_status === "live"
                                     ? "bg-green-100 text-green-800"
                                     : project.demo_status === "ready"
-                                    ? "bg-blue-100 text-blue-800"
-                                    : project.demo_status === "maintenance"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-gray-100 text-gray-800"
+                                      ? "bg-blue-100 text-blue-800"
+                                      : project.demo_status === "maintenance"
+                                        ? "bg-yellow-100 text-yellow-800"
+                                        : "bg-gray-100 text-gray-800"
                                 }`}
                               >
                                 {project.demo_status || "not_ready"}
