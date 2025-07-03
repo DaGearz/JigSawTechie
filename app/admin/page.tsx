@@ -1414,8 +1414,8 @@ export default function AdminDashboard() {
                                     request.id
                                   );
                                   alert("Project created successfully!");
-                                  // Refresh the data
-                                  await loadData();
+                                  // Refresh the project requests data
+                                  await loadProjectRequests();
                                 } catch (error) {
                                   console.error(
                                     "Error creating project:",
