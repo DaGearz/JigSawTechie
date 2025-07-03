@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { quoteService, Quote, supabase } from "@/lib/supabase";
 import { authService, User } from "@/lib/auth";
-import ThreadedMessaging from "@/components/ThreadedMessaging";
+// import ThreadedMessaging from "@/components/ThreadedMessaging";
 import {
   Calendar,
   Mail,
@@ -1409,7 +1409,7 @@ export default function AdminDashboard() {
                                 confirm("Convert this request to a project?")
                               ) {
                                 try {
-                                  setIsLoading(true);
+                                  setLoading(true);
                                   await authService.createProjectFromRequest(
                                     request.id
                                   );
@@ -1425,7 +1425,7 @@ export default function AdminDashboard() {
                                     `Failed to create project: ${error instanceof Error ? error.message : "Unknown error"}`
                                   );
                                 } finally {
-                                  setIsLoading(false);
+                                  setLoading(false);
                                 }
                               }
                             }}
@@ -1496,7 +1496,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Threaded Messaging Modal */}
+        {/* Threaded Messaging Modal - Temporarily Disabled */}
         {showThreadedMessaging && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl h-[80vh] relative">
@@ -1508,11 +1508,19 @@ export default function AdminDashboard() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <ThreadedMessaging
+              <div className="p-8 text-center">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Threaded Messaging Temporarily Disabled
+                </h3>
+                <p className="text-gray-600">
+                  This feature is being updated and will be available soon.
+                </p>
+              </div>
+              {/* <ThreadedMessaging
                 currentUserId={user?.id || ""}
                 currentUserRole="admin"
                 onClose={() => setShowThreadedMessaging(false)}
-              />
+              /> */}
             </div>
           </div>
         )}
