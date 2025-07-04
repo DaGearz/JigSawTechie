@@ -11,6 +11,7 @@ import {
   Code,
   Target,
   Award,
+  ExternalLink,
 } from "lucide-react";
 
 const About = () => {
@@ -72,9 +73,18 @@ const About = () => {
                   <p className="text-primary-600 font-medium mb-4">
                     Founder & Lead Developer
                   </p>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 mb-6">
                     Former Engineer • Software Developer • AI Enthusiast
                   </p>
+                  <a
+                    href="https://toddwilliams.dev/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                  >
+                    View My Portfolio
+                    <ExternalLink className="ml-2 h-4 w-4" />
+                  </a>
                 </div>
               </div>
             </motion.div>
@@ -120,6 +130,22 @@ const About = () => {
                 identity. From sleek, mobile-friendly websites to AI-enhanced
                 tools and automated systems, we build the digital tools that
                 keep your business running smoothly.
+              </p>
+
+              <p className="text-lg leading-relaxed mb-6">
+                Want to see Todd's technical skills and project portfolio in
+                action?{" "}
+                <a
+                  href="https://toddwilliams.dev/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary-600 hover:text-primary-700 font-medium underline"
+                >
+                  Check out his developer portfolio
+                </a>{" "}
+                to explore his latest projects, technical expertise, and the
+                innovative solutions he's built for clients across various
+                industries.
               </p>
             </motion.div>
           </div>

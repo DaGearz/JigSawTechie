@@ -101,28 +101,7 @@ const Hero = () => {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-green-500 text-lg">✓</span>
-                <span>100% satisfaction rate</span>
-              </div>
-            </motion.div>
-
-            {/* Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 1.2 }}
-              className="grid grid-cols-3 gap-8 pt-8 border-t border-gray-200"
-            >
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary-600">50+</div>
-                <div className="text-sm text-gray-600">Happy Clients</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary-600">100%</div>
-                <div className="text-sm text-gray-600">Satisfaction Rate</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary-600">24hr</div>
-                <div className="text-sm text-gray-600">Response Time</div>
+                <span>Dedicated support throughout your project</span>
               </div>
             </motion.div>
           </motion.div>

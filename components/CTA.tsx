@@ -114,10 +114,11 @@ const CTA = () => {
               </div>
               <div>
                 <h4 className="font-semibold text-green-400 mb-2">
-                  Transparent Pricing
+                  Quality Focused
                 </h4>
                 <p className="text-gray-300 text-sm">
-                  Clear, upfront pricing with no hidden fees or surprise costs
+                  Dedicated to delivering high-quality solutions that exceed
+                  expectations
                 </p>
               </div>
               <div>
