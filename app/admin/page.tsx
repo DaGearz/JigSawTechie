@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { quoteService, Quote, supabase } from "@/lib/supabase";
 import { authService, User } from "@/lib/auth";
+import DemoManagement from "@/components/DemoManagement";
 // import ThreadedMessaging from "@/components/ThreadedMessaging";
 import {
   Calendar,
@@ -1526,139 +1527,7 @@ export default function AdminDashboard() {
         )}
 
         {/* Demo Management Tab */}
-        {activeTab === "demos" && (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-medium text-gray-900">
-                Demo Management
-              </h2>
-            </div>
-
-            {demoProjects.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
-                <Globe className="w-12 h-12 mx-auto text-gray-300 mb-4" />
-                <p className="text-lg font-medium mb-2">No projects yet</p>
-                <p>Create projects from quotes to manage demos.</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-200">
-                {demoProjects.map((project) => (
-                  <div key={project.id} className="p-6 hover:bg-gray-50">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-4">
-                          <div>
-                            <h3 className="text-lg font-medium text-gray-900">
-                              {project.name}
-                            </h3>
-                            <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
-                              <span className="flex items-center">
-                                <UserIcon className="w-4 h-4 mr-1" />
-                                {project.client?.name} ({project.client?.email})
-                              </span>
-                              <span
-                                className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                  project.demo_status === "live"
-                                    ? "bg-green-100 text-green-800"
-                                    : project.demo_status === "ready"
-                                      ? "bg-blue-100 text-blue-800"
-                                      : project.demo_status === "maintenance"
-                                        ? "bg-yellow-100 text-yellow-800"
-                                        : "bg-gray-100 text-gray-800"
-                                }`}
-                              >
-                                {project.demo_status || "not_ready"}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {project.demo_url && (
-                          <div className="mt-3">
-                            <p className="text-sm text-gray-600">
-                              <span className="font-medium">Demo URL:</span>{" "}
-                              <a
-                                href={project.demo_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800"
-                              >
-                                {project.demo_url}
-                              </a>
-                            </p>
-                            {project.demo_password && (
-                              <p className="text-sm text-gray-600 mt-1">
-                                <span className="font-medium">Password:</span>{" "}
-                                <code className="bg-gray-100 px-2 py-1 rounded text-xs">
-                                  {project.demo_password}
-                                </code>
-                              </p>
-                            )}
-                          </div>
-                        )}
-
-                        {project.demo_notes && (
-                          <div className="mt-2">
-                            <p className="text-sm text-gray-600">
-                              <span className="font-medium">Notes:</span>{" "}
-                              {project.demo_notes}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="ml-6 flex flex-col items-end space-y-2">
-                        <button
-                          onClick={() => {
-                            setSelectedDemoProject(project);
-                            setShowDeployModal(true);
-                          }}
-                          className="flex items-center space-x-1 bg-purple-600 text-white px-3 py-2 rounded text-sm hover:bg-purple-700 transition-colors"
-                        >
-                          <Upload className="w-4 h-4" />
-                          <span>Deploy Demo</span>
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            setSelectedDemoProject(project);
-                            setDemoForm({
-                              demo_url: project.demo_url || "",
-                              demo_password: project.demo_password || "",
-                              demo_status: project.demo_status || "not_ready",
-                              demo_notes: project.demo_notes || "",
-                            });
-                            setShowDemoModal(true);
-                          }}
-                          className="flex items-center space-x-1 bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition-colors"
-                        >
-                          <Settings className="w-4 h-4" />
-                          <span>Manage Demo</span>
-                        </button>
-
-                        {project.demo_url && (
-                          <button
-                            onClick={() =>
-                              window.open(project.demo_url, "_blank")
-                            }
-                            className="flex items-center space-x-1 bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 transition-colors"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                            <span>View Demo</span>
-                          </button>
-                        )}
-
-                        <span className="text-xs text-gray-500">
-                          Access Count: {project.demo_access_count || 0}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        {activeTab === "demos" && <DemoManagement projects={projects} />}
 
         {/* Companies Management */}
         {activeTab === "companies" && (
