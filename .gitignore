@@ -106,9 +106,23 @@ foraug/
 docs/
 archive/
 doc/
+foraug/
 *.md
 !README.md
 !LICENSE.md
+
+# ===== DATABASE & QUERIES =====
+database/
+queries/
+schemas/
+*.sql
+!**/migrations/*.sql
+
+# ===== TESTING & DEVELOPMENT =====
+test-*.js
+test-*.ts
+*-test.*
+*.test.*
 
 # ===== PROJECT SPECIFIC =====
 /static-preview.html
