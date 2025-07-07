@@ -1,7 +1,7 @@
 // API route for demo access and management
-import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import { demoService } from '@/lib/demo-manager';
+import { NextRequest, NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase";
+import { demoClientService } from "@/lib/demo-client";
 
 // GET /api/demo/[slug] - Get demo information
 export async function GET(
@@ -10,45 +10,48 @@ export async function GET(
 ) {
   try {
     const slug = params.slug;
-    
+
     // Get user from session
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
     if (authError || !user) {
       return NextResponse.json(
-        { error: 'Authentication required' },
+        { error: "Authentication required" },
         { status: 401 }
       );
     }
-    
+
     // Get demo information
-    const demo = await demoService.getDemoBySlug(slug);
-    
+    const demo = await demoClientService.getDemoBySlug(slug);
+
     if (!demo) {
-      return NextResponse.json(
-        { error: 'Demo not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Demo not found" }, { status: 404 });
     }
-    
+
     // Check access permissions
-    const canAccess = await demoService.canUserAccessDemo(user.id, slug);
-    
+    const canAccess = await demoClientService.canUserAccessDemo(user.id, slug);
+
     if (!canAccess) {
-      return NextResponse.json(
-        { error: 'Access denied' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
-    
+
     // Log the access
-    const clientIP = request.headers.get('x-forwarded-for') || 
-                    request.headers.get('x-real-ip') || 
-                    'unknown';
-    const userAgent = request.headers.get('user-agent') || 'unknown';
-    
-    await demoService.logDemoAccess(demo.id, user.id, clientIP, userAgent);
-    
+    const clientIP =
+      request.headers.get("x-forwarded-for") ||
+      request.headers.get("x-real-ip") ||
+      "unknown";
+    const userAgent = request.headers.get("user-agent") || "unknown";
+
+    await demoClientService.logDemoAccess(
+      demo.id,
+      user.id,
+      clientIP,
+      userAgent
+    );
+
     return NextResponse.json({
       success: true,
       demo: {
@@ -59,14 +62,13 @@ export async function GET(
         status: demo.status,
         build_type: demo.build_type,
         last_updated: demo.last_updated,
-        project: demo.project
-      }
+        project: demo.project,
+      },
     });
-    
   } catch (error) {
-    console.error('Demo API error:', error);
+    console.error("Demo API error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
@@ -80,62 +82,64 @@ export async function POST(
   try {
     const slug = params.slug;
     const body = await request.json();
-    
+
     // Get user from session
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
     if (authError || !user) {
       return NextResponse.json(
-        { error: 'Authentication required' },
+        { error: "Authentication required" },
         { status: 401 }
       );
     }
-    
+
     // Check if user is admin
     const { data: userData } = await supabase
-      .from('auth.users')
-      .select('email')
-      .eq('id', user.id)
+      .from("auth.users")
+      .select("email")
+      .eq("id", user.id)
       .single();
-    
-    if (userData?.email !== 'todd@jigsawtechie.com') {
+
+    if (userData?.email !== "todd@jigsawtechie.com") {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: "Admin access required" },
         { status: 403 }
       );
     }
-    
+
     // Get demo
-    const demo = await demoService.getDemoBySlug(slug);
-    
+    const demo = await demoClientService.getDemoBySlug(slug);
+
     if (!demo) {
-      return NextResponse.json(
-        { error: 'Demo not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Demo not found" }, { status: 404 });
     }
-    
+
     // Update demo status or other properties
     if (body.status) {
-      const updated = await demoService.updateDemoStatus(demo.id, body.status);
-      
+      const updated = await demoClientService.updateDemoStatus(
+        demo.id,
+        body.status
+      );
+
       if (!updated) {
         return NextResponse.json(
-          { error: 'Failed to update demo' },
+          { error: "Failed to update demo" },
           { status: 500 }
         );
       }
     }
-    
+
     return NextResponse.json({
       success: true,
-      message: 'Demo updated successfully'
+      message: "Demo updated successfully",
     });
-    
   } catch (error) {
-    console.error('Demo update error:', error);
+    console.error("Demo update error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
@@ -143,56 +147,58 @@ export async function POST(
 
 // DELETE /api/demo/[slug] - Delete demo (admin only)
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { slug: string } }
 ) {
   try {
     const slug = params.slug;
-    
+
     // Get user from session
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
     if (authError || !user) {
       return NextResponse.json(
-        { error: 'Authentication required' },
+        { error: "Authentication required" },
         { status: 401 }
       );
     }
-    
+
     // Check if user is admin
     const { data: userData } = await supabase
-      .from('auth.users')
-      .select('email')
-      .eq('id', user.id)
+      .from("auth.users")
+      .select("email")
+      .eq("id", user.id)
       .single();
-    
-    if (userData?.email !== 'todd@jigsawtechie.com') {
+
+    if (userData?.email !== "todd@jigsawtechie.com") {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: "Admin access required" },
         { status: 403 }
       );
     }
-    
+
     // Delete demo (this will remove files and database record)
-    const { demoManager } = await import('@/lib/demo-manager');
+    const { demoManager } = await import("@/lib/demo-manager");
     const deleted = await demoManager.deleteDemo(slug);
-    
+
     if (!deleted) {
       return NextResponse.json(
-        { error: 'Failed to delete demo' },
+        { error: "Failed to delete demo" },
         { status: 500 }
       );
     }
-    
+
     return NextResponse.json({
       success: true,
-      message: 'Demo deleted successfully'
+      message: "Demo deleted successfully",
     });
-    
   } catch (error) {
-    console.error('Demo deletion error:', error);
+    console.error("Demo deletion error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
