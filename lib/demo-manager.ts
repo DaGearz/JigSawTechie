@@ -439,7 +439,7 @@ export class DemoService {
   }
 
   /**
-   * Get demos for a specific user (client)
+   * Get demos for a specific user (client) - includes team access
    */
   async getUserDemos(userId: string): Promise<DemoProject[]> {
     const { data, error } = await supabase
@@ -450,11 +450,14 @@ export class DemoService {
         project:projects!inner(
           id,
           name,
-          client_id
+          client_id,
+          project_access!left(user_id, access_level, permissions)
         )
       `
       )
-      .eq("project.client_id", userId)
+      .or(
+        `project.client_id.eq.${userId},project.project_access.user_id.eq.${userId}`
+      )
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -462,7 +465,21 @@ export class DemoService {
       return [];
     }
 
-    return data || [];
+    // Filter demos where user has demo access permissions
+    const filteredDemos = (data || []).filter((demo) => {
+      // Primary client always has access
+      if (demo.project?.client_id === userId) {
+        return true;
+      }
+
+      // Check team access permissions
+      const userAccess = demo.project?.project_access?.find(
+        (access: any) => access.user_id === userId
+      );
+      return userAccess && userAccess.permissions?.view_demo === true;
+    });
+
+    return filteredDemos;
   }
 
   /**

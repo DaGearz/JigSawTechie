@@ -268,22 +268,47 @@ export const authService = {
     return authData;
   },
 
-  // Get user's projects (for clients)
+  // Get user's projects (for clients) - includes team access
   async getUserProjects(): Promise<Project[]> {
     const user = await this.getCurrentUser();
     if (!user) throw new Error("Not authenticated");
 
+    // Get projects where user is primary client OR has team access
     const { data, error } = await supabase
       .from("projects")
-      .select("*")
-      .eq("client_id", user.id)
+      .select(
+        `
+        *,
+        user_role:project_access!left(access_level, permissions)
+      `
+      )
+      .or(`client_id.eq.${user.id},project_access.user_id.eq.${user.id}`)
       .order("created_at", { ascending: false });
 
     if (error) {
       throw error;
     }
 
-    return data || [];
+    // Add role information to each project
+    const projectsWithRole = (data || []).map((project) => ({
+      ...project,
+      user_access_level:
+        project.client_id === user.id
+          ? "owner"
+          : project.user_role?.[0]?.access_level || "viewer",
+      user_permissions:
+        project.client_id === user.id
+          ? {
+              view_demo: true,
+              view_files: true,
+              comment: true,
+              approve: true,
+              download: true,
+            }
+          : project.user_role?.[0]?.permissions || { view_demo: false },
+    }));
+
+    return projectsWithRole;
   },
 
   // Convert quote to project and create client account
