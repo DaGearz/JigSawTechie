@@ -33,7 +33,7 @@ export const templates: Template[] = [
       "Social Media Integration",
       "Mobile Responsive",
     ],
-    demoUrl: "/templates/demo/restaurant",
+    demoUrl: "/templates/example/restaurant",
     previewImage: "/templates/restaurant/preview.jpg",
     colors: {
       primary: "#D97706", // Orange
@@ -59,7 +59,7 @@ export const templates: Template[] = [
       "Social Media Feed",
       "Gift Card Sales",
     ],
-    demoUrl: "/templates/demo/beauty-salon",
+    demoUrl: "/templates/example/beauty-salon",
     previewImage: "/templates/beauty-salon/preview.jpg",
     colors: {
       primary: "#EC4899", // Pink
@@ -91,7 +91,7 @@ export const templates: Template[] = [
       "Document Downloads",
       "Appointment Scheduling",
     ],
-    demoUrl: "/templates/demo/professional-services",
+    demoUrl: "/templates/example/professional-services",
     previewImage: "/templates/professional-services/preview.jpg",
     colors: {
       primary: "#1E40AF", // Blue
@@ -126,7 +126,7 @@ export const templates: Template[] = [
       "SEO Optimization",
       "Analytics Integration",
     ],
-    demoUrl: "/templates/demo/ecommerce",
+    demoUrl: "/templates/example/ecommerce",
     previewImage: "/templates/ecommerce/preview.jpg",
     colors: {
       primary: "#059669", // Green
@@ -159,7 +159,7 @@ export const templates: Template[] = [
       "Photo Gallery",
       "Contact Forms",
     ],
-    demoUrl: "/templates/demo/nonprofit",
+    demoUrl: "/templates/example/nonprofit",
     previewImage: "/templates/nonprofit/preview.jpg",
     colors: {
       primary: "#7C3AED", // Purple

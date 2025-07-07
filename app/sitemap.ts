@@ -37,7 +37,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Template demo pages
+  // Template example pages
   const templatePages = [
     "restaurant",
     "beauty-salon",
@@ -45,7 +45,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "ecommerce",
     "nonprofit",
   ].map((template) => ({
-    url: `${baseUrl}/templates/demo/${template}`,
+    url: `${baseUrl}/templates/example/${template}`,
     lastModified: new Date(),
     changeFrequency: "monthly" as const,
     priority: 0.6,
