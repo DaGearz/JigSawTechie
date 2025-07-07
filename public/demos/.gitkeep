@@ -1,0 +1,6 @@
+# Demo Files Directory
+# This directory will contain deployed demo projects
+# Each demo gets its own subdirectory: /demos/[project-slug]/
+
+# Demo files are served statically through Next.js public directory
+# Access controlled through /demo/[projectId] dynamic route
