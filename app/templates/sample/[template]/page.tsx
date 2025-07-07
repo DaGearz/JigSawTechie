@@ -6,13 +6,13 @@ import ProfessionalServicesDemo from "@/components/templates/ProfessionalService
 import EcommerceDemo from "@/components/templates/EcommerceDemo";
 import NonprofitDemo from "@/components/templates/NonprofitDemo";
 
-interface ExamplePageProps {
+interface SamplePageProps {
   params: Promise<{
     template: string;
   }>;
 }
 
-export async function generateMetadata({ params }: ExamplePageProps) {
+export async function generateMetadata({ params }: SamplePageProps) {
   const { template: templateId } = await params;
   const template = getTemplateById(templateId);
 
@@ -23,12 +23,12 @@ export async function generateMetadata({ params }: ExamplePageProps) {
   }
 
   return {
-    title: `${template.name} Example - Jigsaw Techie`,
-    description: `Live example of ${template.name} - ${template.description}`,
+    title: `${template.name} Sample - Jigsaw Techie`,
+    description: `Live sample of ${template.name} - ${template.description}`,
   };
 }
 
-export default async function ExamplePage({ params }: ExamplePageProps) {
+export default async function SamplePage({ params }: SamplePageProps) {
   const { template: templateId } = await params;
   const template = getTemplateById(templateId);
 
@@ -53,10 +53,10 @@ export default async function ExamplePage({ params }: ExamplePageProps) {
           <div className="min-h-screen flex items-center justify-center">
             <div className="text-center">
               <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                Example Coming Soon
+                Sample Coming Soon
               </h1>
               <p className="text-gray-600">
-                The {template.name} example is currently being developed.
+                The {template.name} sample is currently being developed.
               </p>
             </div>
           </div>
@@ -66,9 +66,9 @@ export default async function ExamplePage({ params }: ExamplePageProps) {
 
   return (
     <div className="min-h-screen">
-      {/* Example Header */}
+      {/* Sample Header */}
       <div className="bg-gray-900 text-white py-2 px-4 text-center text-sm">
-        <span>🎨 Live Example: {template.name} Template</span>
+        <span>🎨 Live Sample: {template.name} Template</span>
         <a
           href="/templates"
           className="ml-4 text-blue-300 hover:text-blue-200 underline"
@@ -77,7 +77,7 @@ export default async function ExamplePage({ params }: ExamplePageProps) {
         </a>
       </div>
 
-      {/* Template Example */}
+      {/* Template Sample */}
       {renderTemplate()}
     </div>
   );
