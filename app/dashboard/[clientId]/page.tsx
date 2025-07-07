@@ -6,6 +6,7 @@ import { authService, User, Project } from "@/lib/auth";
 import AdminLogin from "@/components/AdminLogin";
 import ProjectRequestModal from "@/components/ProjectRequestModal";
 import ThreadedMessaging from "@/components/ThreadedMessaging";
+import ClientDemoAccess from "@/components/ClientDemoAccess";
 import {
   Calendar,
   Clock,
@@ -330,17 +331,13 @@ export default function ClientDashboard() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {project.demo_url && (
-                      <a
-                        href={project.demo_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center space-x-1 bg-purple-600 text-white px-3 py-2 rounded text-sm hover:bg-purple-700 transition-colors"
-                      >
-                        <Eye className="w-4 h-4" />
-                        <span>View Demo</span>
-                      </a>
-                    )}
+                    {/* New Demo Access Component */}
+                    <ClientDemoAccess
+                      userId={
+                        user?.role === "admin" ? clientId : user?.id || ""
+                      }
+                      projectId={project.id}
+                    />
                     {project.preview_url && (
                       <a
                         href={project.preview_url}
@@ -377,6 +374,13 @@ export default function ClientDashboard() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Demo Section - Show all user demos */}
+        {user?.role === "client" && projects.length > 0 && (
+          <div className="mt-12">
+            <ClientDemoAccess userId={user?.id || ""} />
           </div>
         )}
       </div>
