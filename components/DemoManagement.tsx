@@ -23,6 +23,7 @@ import {
   getDemoStatusLabel,
   getBuildTypeLabel,
 } from "@/lib/types/demo";
+import DebugAuth from "./DebugAuth";
 
 interface DemoManagementProps {
   projects: any[]; // Existing projects from admin dashboard
@@ -225,6 +226,7 @@ export default function DemoManagement({ projects }: DemoManagementProps) {
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
+      <DebugAuth />
       <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
         <h2 className="text-lg font-medium text-gray-900">
           Demo Management ({demos.length})
