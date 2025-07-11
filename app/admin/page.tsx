@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { quoteService, Quote, supabase } from "@/lib/supabase";
 import { authService, User } from "@/lib/auth";
 import DemoManagement from "@/components/DemoManagement";
+import ProjectAccessManager from "@/components/ProjectAccessManager";
 // import ThreadedMessaging from "@/components/ThreadedMessaging";
 import {
   Calendar,
@@ -88,13 +89,9 @@ export default function AdminDashboard() {
       | "billing_contact",
   });
 
-  // Project Access Management State - TEMPORARILY DISABLED
-  // const [selectedProject, setSelectedProject] = useState<any>(null);
-  // const [showProjectAccess, setShowProjectAccess] = useState(false);
-  // const [projectUsers, setProjectUsers] = useState<any[]>([]);
-  // const [showAddProjectUser, setShowAddProjectUser] = useState(false);
-  // const [addProjectUserForm, setAddProjectUserForm] = useState({
-  //   email: "",
+  // Project Access Management State
+  const [selectedProject, setSelectedProject] = useState<any>(null);
+  const [showProjectAccess, setShowProjectAccess] = useState(false);
   //   access_level: "viewer" as "owner" | "collaborator" | "viewer",
   //   permissions: {
   //     view_demo: true,
@@ -2005,27 +2002,18 @@ export default function AdminDashboard() {
         )}
 
         {/* Project Access Management Modal - TEMPORARILY DISABLED */}
-        {/*
-        {showProjectAccess && selectedProject && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-gray-900">
-                  Manage Project Access - {selectedProject.name}
-                </h3>
-                <button
-                  onClick={() => setShowProjectAccess(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                <div className="flex justify-between items-center mb-4">
-                  <h4 className="text-lg font-medium text-gray-900">
-                    Grant Project Access
-                  </h4>
+        {/* Project Access Management Modal */}
+        <ProjectAccessManager
+          project={selectedProject}
+          isOpen={showProjectAccess}
+          onClose={() => {
+            setShowProjectAccess(false);
+            setSelectedProject(null);
+          }}
+          onUpdate={() => {
+            loadDemoProjects(); // Reload projects to show updated access
+          }}
+        />
                   <button
                     onClick={() => setShowAddProjectUser(!showAddProjectUser)}
                     className="flex items-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700"
