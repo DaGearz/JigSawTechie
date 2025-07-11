@@ -19,37 +19,73 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get demos using a simpler query to avoid relationship issues
-    const { data: userProjects, error: projectsError } = await supabaseAdmin
-      .from("projects")
-      .select("id")
-      .eq("client_id", userId);
+    // Get projects user has access to via project_access table
+    const { data: userProjectAccess, error: projectsError } =
+      await supabaseAdmin
+        .from("project_access")
+        .select(
+          `
+        project_id,
+        access_level,
+        project:projects(
+          id,
+          name,
+          has_demo
+        )
+      `
+        )
+        .eq("user_id", userId);
 
     if (projectsError) {
       return NextResponse.json(
         {
-          error: "Failed to fetch user projects",
+          error: "Failed to fetch user project access",
           details: projectsError.message,
         },
         { status: 500 }
       );
     }
 
-    if (!userProjects || userProjects.length === 0) {
+    if (!userProjectAccess || userProjectAccess.length === 0) {
       return NextResponse.json({
         success: true,
         demos: [],
-        message: "No projects found for user",
+        message: "No project access found for user",
       });
     }
 
-    const projectIds = userProjects.map((p) => p.id);
+    // Filter projects where user has at least 'client' access level for demo viewing
+    const accessibleProjects = userProjectAccess.filter(
+      (access) =>
+        access.access_level === "client" ||
+        access.access_level === "editor" ||
+        access.access_level === "admin"
+    );
 
-    // Get demos for user's projects
+    if (accessibleProjects.length === 0) {
+      return NextResponse.json({
+        success: true,
+        demos: [],
+        message: "No demo access for user projects",
+      });
+    }
+
+    const projectIds = accessibleProjects.map((access) => access.project_id);
+
+    // Get demos for accessible projects with access level info
     const { data: userDemos, error: demosError } = await supabaseAdmin
       .from("demo_projects")
-      .select("*")
+      .select(
+        `
+        *,
+        project:projects(
+          id,
+          name
+        )
+      `
+      )
       .in("project_id", projectIds)
+      .eq("status", "ready")
       .order("created_at", { ascending: false });
 
     if (demosError) {
@@ -62,9 +98,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Add access level information to each demo
+    const demosWithAccess = (userDemos || []).map((demo) => {
+      const projectAccess = accessibleProjects.find(
+        (access) => access.project_id === demo.project_id
+      );
+      return {
+        ...demo,
+        user_access_level: projectAccess?.access_level || "viewer",
+      };
+    });
+
     return NextResponse.json({
       success: true,
-      demos: userDemos || [],
+      demos: demosWithAccess,
     });
   } catch (error) {
     console.error("Client demos API error:", error);

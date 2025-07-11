@@ -39,6 +39,19 @@ export interface Project {
   billing_contact_id?: string;
   created_at: string;
   updated_at: string;
+  // New access control fields
+  user_access_level?: "viewer" | "client" | "editor" | "admin";
+  access_id?: string;
+  project_access?: Array<{
+    id: string;
+    access_level: string;
+    user: {
+      id: string;
+      email: string;
+      name: string;
+      role?: string;
+    };
+  }>;
 }
 
 export interface Company {

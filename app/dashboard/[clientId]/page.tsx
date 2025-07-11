@@ -18,6 +18,7 @@ import {
   Shield,
   Plus,
   MessageCircle,
+  Edit,
   ExternalLink,
   X,
 } from "lucide-react";
@@ -94,20 +95,27 @@ export default function ClientDashboard() {
   const loadProjects = async () => {
     try {
       setLoading(true);
-      let userProjects: Project[];
 
-      if (user?.role === "admin") {
-        // Admin can see all projects, but filter by clientId if specified
-        userProjects = await authService.getAllProjects();
-        if (clientId !== "all") {
-          userProjects = userProjects.filter((p) => p.client_id === clientId);
+      // Use new projects API that handles access control
+      const response = await fetch("/api/projects");
+      const data = await response.json();
+
+      if (data.success) {
+        let userProjects = data.projects || [];
+
+        if (user?.role === "admin" && clientId !== "all") {
+          // Admin viewing specific client - filter projects by client access
+          userProjects = userProjects.filter((project: any) =>
+            project.project_access?.some(
+              (access: any) => access.user?.id === clientId
+            )
+          );
         }
-      } else {
-        // Client can only see their own projects
-        userProjects = await authService.getUserProjects();
-      }
 
-      setProjects(userProjects);
+        setProjects(userProjects);
+      } else {
+        setError(data.error || "Failed to load projects");
+      }
     } catch (err: any) {
       setError(err.message || "Failed to load projects");
     } finally {
@@ -293,16 +301,41 @@ export default function ClientDashboard() {
               >
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {project.name}
-                    </h3>
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                        project.status
-                      )}`}
-                    >
-                      {project.status.replace("_", " ")}
-                    </span>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {project.name}
+                      </h3>
+                      {project.user_access_level && (
+                        <span className="text-xs text-gray-500 mt-1 block">
+                          Access: {project.user_access_level}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {project.status && (
+                        <span
+                          className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
+                            project.status
+                          )}`}
+                        >
+                          {project.status.replace("_", " ")}
+                        </span>
+                      )}
+                      {/* Show edit button for editor+ access levels */}
+                      {(project.user_access_level === "editor" ||
+                        project.user_access_level === "admin" ||
+                        user?.role === "admin") && (
+                        <button
+                          onClick={() =>
+                            console.log("Rename project:", project.name)
+                          }
+                          className="p-1 text-gray-400 hover:text-gray-600"
+                          title="Rename project"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {project.description && (

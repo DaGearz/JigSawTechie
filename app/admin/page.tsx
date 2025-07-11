@@ -269,18 +269,14 @@ export default function AdminDashboard() {
 
   const loadDemoProjects = async () => {
     try {
-      const { data, error } = await supabase
-        .from("projects")
-        .select(
-          `
-          *,
-          client:users!projects_client_id_fkey(name, email)
-        `
-        )
-        .order("created_at", { ascending: false });
+      const response = await fetch("/api/projects");
+      const data = await response.json();
 
-      if (error) throw error;
-      setDemoProjects(data || []);
+      if (data.success) {
+        setDemoProjects(data.projects || []);
+      } else {
+        console.error("Failed to load projects:", data.error);
+      }
     } catch (error) {
       console.error("Failed to load demo projects:", error);
     }

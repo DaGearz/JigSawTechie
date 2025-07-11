@@ -36,18 +36,44 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Ultra simple admin check - just check email
-    if (user.email !== "twilliams@jigsawtechie.com") {
+    // Check if user has admin role
+    const { data: userProfile, error: profileError } = await supabaseAdmin
+      .from("users")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || userProfile?.role !== "admin") {
       return NextResponse.json(
         { error: "Admin access required" },
         { status: 403 }
       );
     }
 
-    // Fetch demos from database using admin client to bypass RLS
+    // Fetch demos with project and access information
     const { data: demos, error: demosError } = await supabaseAdmin
       .from("demo_projects")
-      .select("*")
+      .select(
+        `
+        *,
+        project:projects(
+          id,
+          name,
+          company_id,
+          created_by,
+          project_access(
+            id,
+            access_level,
+            user:users(
+              id,
+              email,
+              name,
+              role
+            )
+          )
+        )
+      `
+      )
       .order("created_at", { ascending: false });
 
     if (demosError) {
