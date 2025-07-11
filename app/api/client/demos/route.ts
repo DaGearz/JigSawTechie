@@ -1,38 +1,21 @@
 // API route for client demo access
-import { NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 
-// GET /api/client/demos - Get demos for authenticated client
-export async function GET() {
+// GET /api/client/demos?userId=xxx - Get demos for specific client
+export async function GET(request: NextRequest) {
   try {
-    // Use SSR client to get authenticated user from cookies
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    // Get userId from query parameters
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get("userId");
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    if (!userId) {
       return NextResponse.json(
         {
-          error: "Authentication required",
-          details: authError?.message || "No user found",
+          error: "User ID required",
+          message: "Please provide userId parameter",
         },
-        { status: 401 }
+        { status: 400 }
       );
     }
 
@@ -40,7 +23,7 @@ export async function GET() {
     const { data: userProjects, error: projectsError } = await supabaseAdmin
       .from("projects")
       .select("id")
-      .eq("client_id", user.id);
+      .eq("client_id", userId);
 
     if (projectsError) {
       return NextResponse.json(

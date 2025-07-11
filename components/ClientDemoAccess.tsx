@@ -40,8 +40,8 @@ export default function ClientDemoAccess({
       setLoading(true);
       setError(null);
 
-      // Use dedicated client API endpoint - auth handled via cookies
-      const response = await fetch("/api/client/demos");
+      // Use dedicated client API endpoint with userId parameter
+      const response = await fetch(`/api/client/demos?userId=${userId}`);
       const data = await response.json();
 
       if (data.success) {
@@ -291,7 +291,7 @@ export function useUserDemos(userId: string) {
     const loadDemos = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/client/demos");
+        const response = await fetch(`/api/client/demos?userId=${userId}`);
         const data = await response.json();
 
         if (data.success) {
