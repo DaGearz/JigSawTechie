@@ -35,13 +35,35 @@ export default function ClientDemoAccess({
     loadUserDemos();
   }, [userId, projectId]);
 
+  const getAuthHeaders = () => {
+    try {
+      const authData = localStorage.getItem(
+        "sb-oyzycafkfmrrqmpwgtdg-auth-token"
+      );
+      if (authData) {
+        const parsed = JSON.parse(authData);
+        if (parsed.access_token) {
+          return {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${parsed.access_token}`,
+          };
+        }
+      }
+    } catch (error) {
+      console.warn("Failed to get auth headers:", error);
+    }
+    return { "Content-Type": "application/json" };
+  };
+
   const loadUserDemos = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Use dedicated client API endpoint
-      const response = await fetch("/api/client/demos");
+      // Use dedicated client API endpoint with auth headers
+      const response = await fetch("/api/client/demos", {
+        headers: getAuthHeaders(),
+      });
       const data = await response.json();
 
       if (data.success) {
@@ -288,10 +310,32 @@ export function useUserDemos(userId: string) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const getAuthHeaders = () => {
+      try {
+        const authData = localStorage.getItem(
+          "sb-oyzycafkfmrrqmpwgtdg-auth-token"
+        );
+        if (authData) {
+          const parsed = JSON.parse(authData);
+          if (parsed.access_token) {
+            return {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${parsed.access_token}`,
+            };
+          }
+        }
+      } catch (error) {
+        console.warn("Failed to get auth headers:", error);
+      }
+      return { "Content-Type": "application/json" };
+    };
+
     const loadDemos = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/client/demos");
+        const response = await fetch("/api/client/demos", {
+          headers: getAuthHeaders(),
+        });
         const data = await response.json();
 
         if (data.success) {

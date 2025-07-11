@@ -5,15 +5,33 @@ import { supabase, supabaseAdmin } from "@/lib/supabase";
 // GET /api/client/demos - Get demos for authenticated client
 export async function GET(request: NextRequest) {
   try {
-    // Get user from session
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    // Try to get user from session first
+    let user = null;
+    let authError = null;
+
+    // First try session-based auth
+    const sessionResult = await supabase.auth.getUser();
+    if (sessionResult.data?.user) {
+      user = sessionResult.data.user;
+    } else {
+      // If session auth fails, try token-based auth
+      const authHeader = request.headers.get("authorization");
+      if (authHeader?.startsWith("Bearer ")) {
+        const token = authHeader.substring(7);
+        const tokenResult = await supabase.auth.getUser(token);
+        if (tokenResult.data?.user) {
+          user = tokenResult.data.user;
+        } else {
+          authError = tokenResult.error;
+        }
+      } else {
+        authError = sessionResult.error;
+      }
+    }
 
     if (authError || !user) {
       return NextResponse.json(
-        { error: "Authentication required" },
+        { error: "Authentication required", details: authError?.message },
         { status: 401 }
       );
     }
