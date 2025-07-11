@@ -48,10 +48,34 @@ export default function DemoManagement({ projects }: DemoManagementProps) {
     loadDemos();
   }, []);
 
+  // Helper function to get auth headers
+  const getAuthHeaders = () => {
+    try {
+      const authData = localStorage.getItem(
+        "sb-oyzycafkfmrrqmpwgtdg-auth-token"
+      );
+      if (authData) {
+        const parsed = JSON.parse(authData);
+        const token = parsed.access_token;
+        return {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+      }
+    } catch (error) {
+      console.error("Error getting auth token:", error);
+    }
+    return {
+      "Content-Type": "application/json",
+    };
+  };
+
   const loadDemos = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/demo/deploy");
+      const response = await fetch("/api/demo/deploy", {
+        headers: getAuthHeaders(),
+      });
       const data = await response.json();
 
       if (data.success) {
@@ -89,9 +113,7 @@ export default function DemoManagement({ projects }: DemoManagementProps) {
 
       const response = await fetch("/api/demo/deploy", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           project_id: selectedProject.id,
           demo_name: deployForm.demo_name,
@@ -145,6 +167,7 @@ export default function DemoManagement({ projects }: DemoManagementProps) {
     try {
       const response = await fetch(`/api/demo/${demo.demo_slug}`, {
         method: "DELETE",
+        headers: getAuthHeaders(),
       });
 
       const data = await response.json();
