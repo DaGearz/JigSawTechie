@@ -4,6 +4,19 @@ import { supabase } from "@/lib/supabase";
 import { demoManager } from "@/lib/demo-manager";
 import { DemoUploadRequest, BuildType, DemoType } from "@/lib/types/demo";
 
+// GET /api/demo/deploy - Redirect to /api/demos for fetching demos
+export async function GET(request: NextRequest) {
+  // Redirect GET requests to the demos endpoint
+  const demosRequest = new Request(new URL("/api/demos", request.url), {
+    method: "GET",
+    headers: request.headers,
+  });
+
+  // Forward to demos endpoint
+  const { GET: demosHandler } = await import("../../demos/route");
+  return demosHandler(demosRequest as NextRequest);
+}
+
 // POST /api/demo/deploy - Deploy a new demo
 export async function POST(request: NextRequest) {
   try {
@@ -38,14 +51,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user is admin - check role in database
-    const { data: userProfile, error: profileError } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (profileError || userProfile?.role !== "admin") {
+    // Ultra simple admin check - just check email
+    if (user.email !== "twilliams@jigsawtechie.com") {
       return NextResponse.json(
         { error: "Admin access required" },
         { status: 403 }
@@ -178,110 +185,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Demo deployment error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
-
-// GET /api/demo/deploy - Get deployment status (admin only)
-export async function GET(request: NextRequest) {
-  try {
-    // Try to get user from session first
-    let user = null;
-    let authError = null;
-
-    // First try session-based auth
-    const sessionResult = await supabase.auth.getUser();
-    if (sessionResult.data?.user) {
-      user = sessionResult.data.user;
-    } else {
-      // If session auth fails, try token-based auth
-      const authHeader = request.headers.get("authorization");
-      if (authHeader?.startsWith("Bearer ")) {
-        const token = authHeader.substring(7);
-        const tokenResult = await supabase.auth.getUser(token);
-        if (tokenResult.data?.user) {
-          user = tokenResult.data.user;
-        } else {
-          authError = tokenResult.error;
-        }
-      } else {
-        authError = sessionResult.error;
-      }
-    }
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
-
-    // Check if user is admin - check role in database
-    const { data: userProfile, error: profileError } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (profileError || userProfile?.role !== "admin") {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 }
-      );
-    }
-
-    // Get all demos with deployment status
-    const { data: demos, error } = await supabase
-      .from("demo_projects")
-      .select(
-        `
-        id,
-        demo_name,
-        demo_slug,
-        demo_url,
-        status,
-        build_type,
-        file_size_mb,
-        deployed_at,
-        last_updated,
-        created_at,
-        project:projects(
-          id,
-          name,
-          client_id,
-          client:auth.users(id, email, raw_user_meta_data)
-        )
-      `
-      )
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      return NextResponse.json(
-        { error: "Failed to fetch demos" },
-        { status: 500 }
-      );
-    }
-
-    // Get deployment statistics
-    const stats = {
-      total_demos: demos?.length || 0,
-      ready_demos: demos?.filter((d) => d.status === "ready").length || 0,
-      building_demos: demos?.filter((d) => d.status === "building").length || 0,
-      error_demos: demos?.filter((d) => d.status === "error").length || 0,
-      total_file_size_mb:
-        demos?.reduce((sum, d) => sum + (d.file_size_mb || 0), 0) || 0,
-    };
-
-    return NextResponse.json({
-      success: true,
-      demos: demos || [],
-      stats,
-    });
-  } catch (error) {
-    console.error("Demo status error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

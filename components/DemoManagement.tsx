@@ -74,15 +74,17 @@ export default function DemoManagement({ projects }: DemoManagementProps) {
   const loadDemos = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/demo/deploy", {
+      setError(null);
+      const response = await fetch("/api/demos", {
         headers: getAuthHeaders(),
       });
       const data = await response.json();
 
       if (data.success) {
-        setDemos(data.demos);
+        setDemos(data.demos || []);
       } else {
         setError(data.error || "Failed to load demos");
+        console.error("Demo loading error:", data);
       }
     } catch (err) {
       setError("Failed to load demos");
@@ -193,6 +195,7 @@ export default function DemoManagement({ projects }: DemoManagementProps) {
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow overflow-hidden">
+        <DebugAuth />
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-medium text-gray-900">Demo Management</h2>
         </div>
@@ -207,6 +210,7 @@ export default function DemoManagement({ projects }: DemoManagementProps) {
   if (error) {
     return (
       <div className="bg-white rounded-lg shadow overflow-hidden">
+        <DebugAuth />
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-medium text-gray-900">Demo Management</h2>
         </div>
@@ -559,7 +563,10 @@ export default function DemoManagement({ projects }: DemoManagementProps) {
                   deploying ||
                   !selectedProject ||
                   !deployForm.demo_name ||
-                  !deployForm.local_path
+                  (deployForm.demo_type === "integrated" &&
+                    !deployForm.local_path) ||
+                  (deployForm.demo_type === "external" &&
+                    !deployForm.external_url)
                 }
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
               >

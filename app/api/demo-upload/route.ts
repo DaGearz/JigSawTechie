@@ -43,14 +43,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
-    // Check if user is admin
-    const { data: profile } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (profile?.role !== "admin") {
+    // Ultra simple admin check - just check email
+    if (user.email !== "twilliams@jigsawtechie.com") {
       return NextResponse.json(
         { error: "Admin access required" },
         { status: 403 }
