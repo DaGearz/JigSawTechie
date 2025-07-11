@@ -1,6 +1,6 @@
 // API route for fetching demos
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 
 // GET /api/demos - Fetch all demos (admin only)
 export async function GET(request: NextRequest) {
@@ -44,8 +44,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch demos from database
-    const { data: demos, error: demosError } = await supabase
+    // Fetch demos from database using admin client to bypass RLS
+    const { data: demos, error: demosError } = await supabaseAdmin
       .from("demo_projects")
       .select("*")
       .order("created_at", { ascending: false });
