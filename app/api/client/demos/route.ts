@@ -55,41 +55,17 @@ export async function GET(request: NextRequest) {
     if (ownedError) {
       console.error("Error fetching owned demos:", ownedError);
       return NextResponse.json(
-        { error: "Failed to fetch demos" },
+        {
+          error: "Failed to fetch demos",
+          details: ownedError.message,
+          user_id: user.id,
+        },
         { status: 500 }
       );
     }
 
-    // Get demos for projects where user has team access using admin client
-    const { data: accessDemos, error: accessError } = await supabaseAdmin
-      .from("demo_projects")
-      .select(
-        `
-        *,
-        project:projects!inner(
-          id,
-          name,
-          client_id,
-          project_access!inner(user_id, access_level, permissions)
-        )
-      `
-      )
-      .eq("project.project_access.user_id", user.id)
-      .order("created_at", { ascending: false });
-
-    if (accessError) {
-      console.warn("Could not fetch team access demos:", accessError);
-    }
-
-    // Combine both sets of demos, avoiding duplicates
-    const allDemos = [...(ownedDemos || [])];
-    if (accessDemos) {
-      for (const demo of accessDemos) {
-        if (!allDemos.find((d) => d.id === demo.id)) {
-          allDemos.push(demo);
-        }
-      }
-    }
+    // For now, just return owned demos (team access can be added later)
+    const allDemos = ownedDemos || [];
 
     return NextResponse.json({
       success: true,
@@ -98,7 +74,10 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Client demos API error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
