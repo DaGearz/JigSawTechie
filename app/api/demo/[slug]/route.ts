@@ -96,8 +96,14 @@ export async function POST(
       );
     }
 
-    // Check if user is admin - use email from auth object
-    if (user.email !== "todd@jigsawtechie.com") {
+    // Check if user is admin - check role in database
+    const { data: userProfile, error: profileError } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || userProfile?.role !== "admin") {
       return NextResponse.json(
         { error: "Admin access required" },
         { status: 403 }
@@ -160,8 +166,14 @@ export async function DELETE(
       );
     }
 
-    // Check if user is admin - use email from auth object
-    if (user.email !== "todd@jigsawtechie.com") {
+    // Check if user is admin - check role in database
+    const { data: userProfile, error: profileError } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || userProfile?.role !== "admin") {
       return NextResponse.json(
         { error: "Admin access required" },
         { status: 403 }
