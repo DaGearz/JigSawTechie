@@ -23,6 +23,7 @@ import {
   getDemoStatusLabel,
   getBuildTypeLabel,
 } from "@/lib/types/demo";
+import DemoEditModal from "./DemoEditModal";
 
 interface DemoManagementProps {
   projects: any[]; // Existing projects from admin dashboard
@@ -33,7 +34,9 @@ export default function DemoManagement({ projects }: DemoManagementProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showDeployModal, setShowDeployModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState<any>(null);
+  const [selectedDemo, setSelectedDemo] = useState<DemoProject | null>(null);
   const [deployForm, setDeployForm] = useState({
     demo_name: "",
     demo_type: "integrated" as DemoType,
@@ -333,6 +336,17 @@ export default function DemoManagement({ projects }: DemoManagementProps) {
                   )}
 
                   <button
+                    onClick={() => {
+                      setSelectedDemo(demo);
+                      setShowEditModal(true);
+                    }}
+                    className="flex items-center space-x-1 bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition-colors"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>Edit</span>
+                  </button>
+
+                  <button
                     onClick={() => handleDeleteDemo(demo)}
                     className="flex items-center space-x-1 bg-red-600 text-white px-3 py-2 rounded text-sm hover:bg-red-700 transition-colors"
                   >
@@ -360,8 +374,11 @@ export default function DemoManagement({ projects }: DemoManagementProps) {
                   setSelectedProject(null);
                   setDeployForm({
                     demo_name: "",
+                    demo_type: "integrated",
                     build_type: "static",
                     local_path: "",
+                    external_url: "",
+                    external_description: "",
                   });
                 }}
                 className="text-gray-400 hover:text-gray-600"
@@ -544,8 +561,11 @@ export default function DemoManagement({ projects }: DemoManagementProps) {
                   setSelectedProject(null);
                   setDeployForm({
                     demo_name: "",
+                    demo_type: "integrated",
                     build_type: "static",
                     local_path: "",
+                    external_url: "",
+                    external_description: "",
                   });
                 }}
                 className="px-4 py-2 text-gray-700 border border-gray-300 rounded hover:bg-gray-50"
@@ -572,6 +592,23 @@ export default function DemoManagement({ projects }: DemoManagementProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Demo Edit Modal */}
+      {selectedDemo && (
+        <DemoEditModal
+          demo={selectedDemo}
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedDemo(null);
+          }}
+          onUpdate={() => {
+            loadDemos();
+            setShowEditModal(false);
+            setSelectedDemo(null);
+          }}
+        />
       )}
     </div>
   );

@@ -1,25 +1,32 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  Eye, 
-  ExternalLink, 
-  Clock, 
-  CheckCircle, 
+import { useState, useEffect } from "react";
+import {
+  Eye,
+  ExternalLink,
+  Clock,
+  CheckCircle,
   AlertCircle,
   RefreshCw,
   Globe,
   Calendar,
-  User
-} from 'lucide-react';
-import { DemoProject, getDemoStatusColor, getDemoStatusLabel } from '@/lib/types/demo';
+  User,
+} from "lucide-react";
+import {
+  DemoProject,
+  getDemoStatusColor,
+  getDemoStatusLabel,
+} from "@/lib/types/demo";
 
 interface ClientDemoAccessProps {
   userId: string;
   projectId?: string; // If provided, show only demos for this project
 }
 
-export default function ClientDemoAccess({ userId, projectId }: ClientDemoAccessProps) {
+export default function ClientDemoAccess({
+  userId,
+  projectId,
+}: ClientDemoAccessProps) {
   const [demos, setDemos] = useState<DemoProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,32 +39,28 @@ export default function ClientDemoAccess({ userId, projectId }: ClientDemoAccess
     try {
       setLoading(true);
       setError(null);
-      
-      // For now, we'll use the admin API and filter client-side
-      // In production, you'd want a dedicated client API endpoint
-      const response = await fetch('/api/demo/deploy');
+
+      // Use dedicated client API endpoint
+      const response = await fetch("/api/client/demos");
       const data = await response.json();
-      
+
       if (data.success) {
-        // Filter demos for this user's projects
-        let userDemos = data.demos.filter((demo: DemoProject) => 
-          demo.project?.client_id === userId
-        );
-        
+        let userDemos = data.demos;
+
         // If projectId is specified, filter further
         if (projectId) {
-          userDemos = userDemos.filter((demo: DemoProject) => 
-            demo.project_id === projectId
+          userDemos = userDemos.filter(
+            (demo: DemoProject) => demo.project_id === projectId
           );
         }
-        
+
         setDemos(userDemos);
       } else {
-        setError('Failed to load demos');
+        setError(data.error || "Failed to load demos");
       }
     } catch (err) {
-      setError('Failed to load demos');
-      console.error('Error loading user demos:', err);
+      setError("Failed to load demos");
+      console.error("Error loading user demos:", err);
     } finally {
       setLoading(false);
     }
@@ -65,7 +68,7 @@ export default function ClientDemoAccess({ userId, projectId }: ClientDemoAccess
 
   const handleDemoAccess = async (demo: DemoProject) => {
     // Navigate to the demo page
-    window.open(`/demo/${demo.demo_slug}`, '_blank');
+    window.open(`/demo/${demo.demo_slug}`, "_blank");
   };
 
   if (loading) {
@@ -99,7 +102,9 @@ export default function ClientDemoAccess({ userId, projectId }: ClientDemoAccess
       <div className="text-center p-6 bg-gray-50 rounded-lg">
         <Globe className="w-8 h-8 text-gray-400 mx-auto mb-2" />
         <p className="text-gray-600 text-sm">
-          {projectId ? 'No demo available for this project yet' : 'No demos available yet'}
+          {projectId
+            ? "No demo available for this project yet"
+            : "No demos available yet"}
         </p>
       </div>
     );
@@ -116,13 +121,15 @@ export default function ClientDemoAccess({ userId, projectId }: ClientDemoAccess
   // Show all demos for the user
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Project Demos</h3>
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        Your Project Demos
+      </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {demos.map((demo) => (
-          <DemoCard 
-            key={demo.id} 
-            demo={demo} 
-            onAccess={() => handleDemoAccess(demo)} 
+          <DemoCard
+            key={demo.id}
+            demo={demo}
+            onAccess={() => handleDemoAccess(demo)}
           />
         ))}
       </div>
@@ -131,14 +138,20 @@ export default function ClientDemoAccess({ userId, projectId }: ClientDemoAccess
 }
 
 // Component for inline demo access button (used in project cards)
-function DemoAccessButton({ demo, onAccess }: { demo: DemoProject; onAccess: () => void }) {
+function DemoAccessButton({
+  demo,
+  onAccess,
+}: {
+  demo: DemoProject;
+  onAccess: () => void;
+}) {
   const getStatusIcon = () => {
     switch (demo.status) {
-      case 'ready':
+      case "ready":
         return <CheckCircle className="w-4 h-4" />;
-      case 'building':
+      case "building":
         return <RefreshCw className="w-4 h-4 animate-spin" />;
-      case 'error':
+      case "error":
         return <AlertCircle className="w-4 h-4" />;
       default:
         return <Clock className="w-4 h-4" />;
@@ -147,43 +160,59 @@ function DemoAccessButton({ demo, onAccess }: { demo: DemoProject; onAccess: () 
 
   const getButtonClass = () => {
     switch (demo.status) {
-      case 'ready':
-        return 'bg-green-600 hover:bg-green-700 text-white';
-      case 'building':
-        return 'bg-blue-600 hover:bg-blue-700 text-white';
-      case 'error':
-        return 'bg-red-600 hover:bg-red-700 text-white';
+      case "ready":
+        return "bg-green-600 hover:bg-green-700 text-white";
+      case "building":
+        return "bg-blue-600 hover:bg-blue-700 text-white";
+      case "error":
+        return "bg-red-600 hover:bg-red-700 text-white";
       default:
-        return 'bg-gray-400 cursor-not-allowed text-white';
+        return "bg-gray-400 cursor-not-allowed text-white";
     }
   };
 
   return (
     <button
-      onClick={demo.status === 'ready' ? onAccess : undefined}
-      disabled={demo.status !== 'ready'}
+      onClick={demo.status === "ready" ? onAccess : undefined}
+      disabled={demo.status !== "ready"}
       className={`flex items-center space-x-1 px-3 py-2 rounded text-sm transition-colors ${getButtonClass()}`}
-      title={demo.status === 'ready' ? 'View Demo' : `Demo Status: ${getDemoStatusLabel(demo.status)}`}
+      title={
+        demo.status === "ready"
+          ? "View Demo"
+          : `Demo Status: ${getDemoStatusLabel(demo.status)}`
+      }
     >
       {getStatusIcon()}
       <span>
-        {demo.status === 'ready' ? 'View Demo' : getDemoStatusLabel(demo.status)}
+        {demo.status === "ready"
+          ? "View Demo"
+          : getDemoStatusLabel(demo.status)}
       </span>
     </button>
   );
 }
 
 // Component for demo cards (used in demo list view)
-function DemoCard({ demo, onAccess }: { demo: DemoProject; onAccess: () => void }) {
+function DemoCard({
+  demo,
+  onAccess,
+}: {
+  demo: DemoProject;
+  onAccess: () => void;
+}) {
   return (
     <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow border">
       <div className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
-            <h4 className="font-semibold text-gray-900 mb-1">{demo.demo_name}</h4>
+            <h4 className="font-semibold text-gray-900 mb-1">
+              {demo.demo_name}
+            </h4>
             <p className="text-sm text-gray-600">{demo.project?.name}</p>
           </div>
-          <span className={`px-2 py-1 text-xs font-medium rounded-full bg-${getDemoStatusColor(demo.status)}-100 text-${getDemoStatusColor(demo.status)}-800`}>
+          <span
+            className={`px-2 py-1 text-xs font-medium rounded-full bg-${getDemoStatusColor(demo.status)}-100 text-${getDemoStatusColor(demo.status)}-800`}
+          >
             {getDemoStatusLabel(demo.status)}
           </span>
         </div>
@@ -191,12 +220,16 @@ function DemoCard({ demo, onAccess }: { demo: DemoProject; onAccess: () => void 
         <div className="space-y-2 text-xs text-gray-500 mb-4">
           <div className="flex items-center">
             <Calendar className="w-3 h-3 mr-1" />
-            <span>Updated {new Date(demo.last_updated).toLocaleDateString()}</span>
+            <span>
+              Updated {new Date(demo.last_updated).toLocaleDateString()}
+            </span>
           </div>
           {demo.deployed_at && (
             <div className="flex items-center">
               <Globe className="w-3 h-3 mr-1" />
-              <span>Deployed {new Date(demo.deployed_at).toLocaleDateString()}</span>
+              <span>
+                Deployed {new Date(demo.deployed_at).toLocaleDateString()}
+              </span>
             </div>
           )}
         </div>
@@ -205,9 +238,9 @@ function DemoCard({ demo, onAccess }: { demo: DemoProject; onAccess: () => void 
           <div className="text-xs text-gray-400">
             {demo.file_size_mb && `${demo.file_size_mb.toFixed(1)} MB`}
           </div>
-          
+
           <div className="flex items-center space-x-2">
-            {demo.status === 'ready' && (
+            {demo.status === "ready" && (
               <>
                 <button
                   onClick={onAccess}
@@ -227,15 +260,15 @@ function DemoCard({ demo, onAccess }: { demo: DemoProject; onAccess: () => void 
                 </a>
               </>
             )}
-            
-            {demo.status === 'building' && (
+
+            {demo.status === "building" && (
               <div className="flex items-center space-x-1 text-blue-600 text-xs">
                 <RefreshCw className="w-3 h-3 animate-spin" />
                 <span>Building...</span>
               </div>
             )}
-            
-            {demo.status === 'error' && (
+
+            {demo.status === "error" && (
               <div className="flex items-center space-x-1 text-red-600 text-xs">
                 <AlertCircle className="w-3 h-3" />
                 <span>Error</span>
@@ -258,19 +291,16 @@ export function useUserDemos(userId: string) {
     const loadDemos = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/demo/deploy');
+        const response = await fetch("/api/client/demos");
         const data = await response.json();
-        
+
         if (data.success) {
-          const userDemos = data.demos.filter((demo: DemoProject) => 
-            demo.project?.client_id === userId
-          );
-          setDemos(userDemos);
+          setDemos(data.demos);
         } else {
-          setError('Failed to load demos');
+          setError(data.error || "Failed to load demos");
         }
       } catch (err) {
-        setError('Failed to load demos');
+        setError("Failed to load demos");
       } finally {
         setLoading(false);
       }

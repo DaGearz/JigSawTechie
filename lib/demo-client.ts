@@ -1,7 +1,7 @@
 // 🎯 Client-Safe Demo Service
 // Database operations that can be used in client components
 
-import { supabase } from "./supabase";
+import { supabaseAdmin } from "./supabase";
 import { DemoProject } from "./types/demo";
 
 export class DemoClientService {
@@ -9,7 +9,7 @@ export class DemoClientService {
    * Get all demos (admin only) - client-safe version
    */
   async getAllDemos(): Promise<DemoProject[]> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from("demo_projects")
       .select(
         `
@@ -37,7 +37,7 @@ export class DemoClientService {
    */
   async getUserDemos(userId: string): Promise<DemoProject[]> {
     // Get demos for projects owned by user
-    const { data: ownedDemos, error: ownedError } = await supabase
+    const { data: ownedDemos, error: ownedError } = await supabaseAdmin
       .from("demo_projects")
       .select(
         `
@@ -58,7 +58,7 @@ export class DemoClientService {
     }
 
     // Get demos for projects where user has team access
-    const { data: accessDemos, error: accessError } = await supabase
+    const { data: accessDemos, error: accessError } = await supabaseAdmin
       .from("demo_projects")
       .select(
         `
@@ -111,7 +111,7 @@ export class DemoClientService {
    * Get demo by slug
    */
   async getDemoBySlug(slug: string): Promise<DemoProject | null> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from("demo_projects")
       .select(
         `
@@ -139,7 +139,7 @@ export class DemoClientService {
    * Check if user can access demo
    */
   async canUserAccessDemo(userId: string, demoSlug: string): Promise<boolean> {
-    const { data, error } = await supabase.rpc("can_access_demo", {
+    const { data, error } = await supabaseAdmin.rpc("can_access_demo", {
       demo_slug: demoSlug,
       user_id: userId,
     });
@@ -161,7 +161,7 @@ export class DemoClientService {
     ipAddress?: string,
     userAgent?: string
   ): Promise<void> {
-    await supabase.from("demo_access_logs").insert({
+    await supabaseAdmin.from("demo_access_logs").insert({
       demo_id: demoId,
       user_id: userId,
       ip_address: ipAddress,
@@ -173,7 +173,7 @@ export class DemoClientService {
    * Update demo status
    */
   async updateDemoStatus(demoId: string, status: string): Promise<boolean> {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from("demo_projects")
       .update({
         status,

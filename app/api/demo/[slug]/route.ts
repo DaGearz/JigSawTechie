@@ -1,6 +1,6 @@
 // API route for demo access and management
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { demoClientService } from "@/lib/demo-client";
 
 // GET /api/demo/[slug] - Get demo information
