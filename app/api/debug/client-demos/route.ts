@@ -4,34 +4,77 @@ import { supabase, supabaseAdmin } from "@/lib/supabase";
 
 export async function GET(request: NextRequest) {
   try {
-    // Get user from session
+    // Get user from session - try multiple methods
     let user = null;
     let authError = null;
+    let authMethod = "none";
 
-    // First try session-based auth
+    // Method 1: Session-based auth
     const sessionResult = await supabase.auth.getUser();
     if (sessionResult.data?.user) {
       user = sessionResult.data.user;
+      authMethod = "session";
     } else {
-      // If session auth fails, try token-based auth
+      // Method 2: Token-based auth from Authorization header
       const authHeader = request.headers.get("authorization");
       if (authHeader?.startsWith("Bearer ")) {
         const token = authHeader.substring(7);
         const tokenResult = await supabase.auth.getUser(token);
         if (tokenResult.data?.user) {
           user = tokenResult.data.user;
+          authMethod = "bearer_token";
         } else {
           authError = tokenResult.error;
         }
       } else {
-        authError = sessionResult.error;
+        // Method 3: Try to get from cookies
+        const cookies = request.headers.get("cookie");
+        if (cookies) {
+          // Extract Supabase auth token from cookies
+          const authTokenMatch = cookies.match(
+            /sb-oyzycafkfmrrqmpwgtdg-auth-token=([^;]+)/
+          );
+          if (authTokenMatch) {
+            try {
+              const tokenData = JSON.parse(
+                decodeURIComponent(authTokenMatch[1])
+              );
+              if (tokenData.access_token) {
+                const cookieResult = await supabase.auth.getUser(
+                  tokenData.access_token
+                );
+                if (cookieResult.data?.user) {
+                  user = cookieResult.data.user;
+                  authMethod = "cookie";
+                } else {
+                  authError = cookieResult.error;
+                }
+              }
+            } catch (e) {
+              authError = { message: "Failed to parse cookie token" };
+            }
+          }
+        }
+
+        if (!user && !authError) {
+          authError = sessionResult.error || {
+            message: "No auth method worked",
+          };
+        }
       }
     }
 
     const debug = {
       timestamp: new Date().toISOString(),
       user: user ? { id: user.id, email: user.email } : null,
+      authMethod,
       authError: authError?.message || null,
+      headers: {
+        authorization: request.headers.get("authorization")
+          ? "present"
+          : "missing",
+        cookie: request.headers.get("cookie") ? "present" : "missing",
+      },
       tests: {},
     };
 

@@ -35,39 +35,20 @@ export default function ClientDemoAccess({
     loadUserDemos();
   }, [userId, projectId]);
 
-  const getAuthHeaders = () => {
-    try {
-      const authData = localStorage.getItem(
-        "sb-oyzycafkfmrrqmpwgtdg-auth-token"
-      );
-      if (authData) {
-        const parsed = JSON.parse(authData);
-        if (parsed.access_token) {
-          return {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${parsed.access_token}`,
-          };
-        }
-      }
-    } catch (error) {
-      console.warn("Failed to get auth headers:", error);
-    }
-    return { "Content-Type": "application/json" };
-  };
-
   const loadUserDemos = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Use dedicated client API endpoint with auth headers
-      const response = await fetch("/api/client/demos", {
-        headers: getAuthHeaders(),
-      });
+      // Use dedicated client API endpoint (no auth needed, filtering done client-side)
+      const response = await fetch("/api/client/demos");
       const data = await response.json();
 
       if (data.success) {
-        let userDemos = data.demos;
+        // Filter demos for this user's projects
+        let userDemos = data.demos.filter(
+          (demo: DemoProject) => demo.project?.client_id === userId
+        );
 
         // If projectId is specified, filter further
         if (projectId) {
@@ -310,36 +291,18 @@ export function useUserDemos(userId: string) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const getAuthHeaders = () => {
-      try {
-        const authData = localStorage.getItem(
-          "sb-oyzycafkfmrrqmpwgtdg-auth-token"
-        );
-        if (authData) {
-          const parsed = JSON.parse(authData);
-          if (parsed.access_token) {
-            return {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${parsed.access_token}`,
-            };
-          }
-        }
-      } catch (error) {
-        console.warn("Failed to get auth headers:", error);
-      }
-      return { "Content-Type": "application/json" };
-    };
-
     const loadDemos = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/client/demos", {
-          headers: getAuthHeaders(),
-        });
+        const response = await fetch("/api/client/demos");
         const data = await response.json();
 
         if (data.success) {
-          setDemos(data.demos);
+          // Filter demos for this user's projects
+          const userDemos = data.demos.filter(
+            (demo: DemoProject) => demo.project?.client_id === userId
+          );
+          setDemos(userDemos);
         } else {
           setError(data.error || "Failed to load demos");
         }
