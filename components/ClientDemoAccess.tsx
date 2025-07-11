@@ -35,20 +35,36 @@ export default function ClientDemoAccess({
     loadUserDemos();
   }, [userId, projectId]);
 
+  const getAuthHeaders = async () => {
+    try {
+      // Try to get the current session
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        return {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        };
+      }
+    } catch (error) {
+      console.warn("Failed to get auth session:", error);
+    }
+    return { "Content-Type": "application/json" };
+  };
+
   const loadUserDemos = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Use dedicated client API endpoint (no auth needed, filtering done client-side)
-      const response = await fetch("/api/client/demos");
+      // Use dedicated client API endpoint with proper auth
+      const headers = await getAuthHeaders();
+      const response = await fetch("/api/client/demos", { headers });
       const data = await response.json();
 
       if (data.success) {
-        // Filter demos for this user's projects
-        let userDemos = data.demos.filter(
-          (demo: DemoProject) => demo.project?.client_id === userId
-        );
+        let userDemos = data.demos;
 
         // If projectId is specified, filter further
         if (projectId) {
@@ -291,18 +307,32 @@ export function useUserDemos(userId: string) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const getAuthHeaders = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          return {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          };
+        }
+      } catch (error) {
+        console.warn("Failed to get auth session:", error);
+      }
+      return { "Content-Type": "application/json" };
+    };
+
     const loadDemos = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/client/demos");
+        const headers = await getAuthHeaders();
+        const response = await fetch("/api/client/demos", { headers });
         const data = await response.json();
 
         if (data.success) {
-          // Filter demos for this user's projects
-          const userDemos = data.demos.filter(
-            (demo: DemoProject) => demo.project?.client_id === userId
-          );
-          setDemos(userDemos);
+          setDemos(data.demos);
         } else {
           setError(data.error || "Failed to load demos");
         }
