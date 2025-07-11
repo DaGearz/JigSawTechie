@@ -20,14 +20,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user is admin
-    const { data: userData } = await supabase
-      .from("auth.users")
-      .select("email")
-      .eq("id", user.id)
-      .single();
-
-    if (userData?.email !== "todd@jigsawtechie.com") {
+    // Check if user is admin - use email from auth object
+    if (user.email !== "todd@jigsawtechie.com") {
       return NextResponse.json(
         { error: "Admin access required" },
         { status: 403 }
@@ -183,14 +177,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Check if user is admin
-    const { data: userData } = await supabase
-      .from("auth.users")
-      .select("email")
-      .eq("id", user.id)
-      .single();
-
-    if (userData?.email !== "todd@jigsawtechie.com") {
+    // Check if user is admin - use email from auth object
+    if (user.email !== "todd@jigsawtechie.com") {
       return NextResponse.json(
         { error: "Admin access required" },
         { status: 403 }
