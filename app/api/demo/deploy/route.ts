@@ -1,6 +1,6 @@
 // API route for demo deployment
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { demoManager } from "@/lib/demo-manager";
 import { DemoUploadRequest, BuildType, DemoType } from "@/lib/types/demo";
 
@@ -116,8 +116,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if project exists
-    const { data: project, error: projectError } = await supabase
+    // Check if project exists using admin client
+    const { data: project, error: projectError } = await supabaseAdmin
       .from("projects")
       .select("id, name, client_id")
       .eq("id", project_id)
@@ -127,8 +127,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    // Check if demo already exists for this project
-    const { data: existingDemo } = await supabase
+    // Check if demo already exists for this project using admin client
+    const { data: existingDemo } = await supabaseAdmin
       .from("demo_projects")
       .select("id")
       .eq("project_id", project_id)

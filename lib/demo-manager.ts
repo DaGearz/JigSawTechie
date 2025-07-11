@@ -5,7 +5,7 @@ import fs from "fs/promises";
 import path from "path";
 import { createReadStream, createWriteStream } from "fs";
 import { pipeline } from "stream/promises";
-import { supabase } from "./supabase";
+import { supabase, supabaseAdmin } from "./supabase";
 import {
   DemoProject,
   DemoUploadRequest,
@@ -67,8 +67,8 @@ export class DemoManager {
       const demoPath = path.join(this.DEMO_BASE_PATH, demoSlug);
       const demoUrl = generateDemoUrl(demoSlug);
 
-      // Create demo record in database
-      const { data: demoProject, error: dbError } = await supabase
+      // Create demo record in database using admin client
+      const { data: demoProject, error: dbError } = await supabaseAdmin
         .from("demo_projects")
         .insert({
           project_id: request.project_id,
@@ -99,8 +99,8 @@ export class DemoManager {
       // Calculate file size
       const fileSize = await this.calculateDirectorySize(demoPath);
 
-      // Update demo record with deployment info
-      await supabase
+      // Update demo record with deployment info using admin client
+      await supabaseAdmin
         .from("demo_projects")
         .update({
           status: "ready",
@@ -109,8 +109,8 @@ export class DemoManager {
         })
         .eq("id", demoProject.id);
 
-      // Update project to indicate it has a demo
-      await supabase
+      // Update project to indicate it has a demo using admin client
+      await supabaseAdmin
         .from("projects")
         .update({
           has_demo: true,
@@ -146,8 +146,8 @@ export class DemoManager {
       // Generate demo slug for consistency
       const demoSlug = generateDemoSlug(request.demo_name);
 
-      // Create demo record in database
-      const { data: demoProject, error: demoError } = await supabase
+      // Create demo record in database using admin client
+      const { data: demoProject, error: demoError } = await supabaseAdmin
         .from("demo_projects")
         .insert({
           project_id: request.project_id,
@@ -169,8 +169,8 @@ export class DemoManager {
         throw new Error(`Failed to create external demo: ${demoError.message}`);
       }
 
-      // Update project to mark it has a demo
-      await supabase
+      // Update project to mark it has a demo using admin client
+      await supabaseAdmin
         .from("projects")
         .update({
           has_demo: true,
@@ -455,8 +455,11 @@ export class DemoManager {
       // Remove files
       await fs.rm(demoPath, { recursive: true, force: true });
 
-      // Remove database record
-      await supabase.from("demo_projects").delete().eq("demo_slug", demoSlug);
+      // Remove database record using admin client
+      await supabaseAdmin
+        .from("demo_projects")
+        .delete()
+        .eq("demo_slug", demoSlug);
 
       return true;
     } catch (error) {
@@ -605,7 +608,7 @@ export class DemoService {
    * Check if user can access demo
    */
   async canUserAccessDemo(userId: string, demoSlug: string): Promise<boolean> {
-    const { data, error } = await supabase.rpc("can_access_demo", {
+    const { data, error } = await supabaseAdmin.rpc("can_access_demo", {
       demo_slug: demoSlug,
       user_id: userId,
     });
@@ -627,7 +630,7 @@ export class DemoService {
     ipAddress?: string,
     userAgent?: string
   ): Promise<void> {
-    await supabase.from("demo_access_logs").insert({
+    await supabaseAdmin.from("demo_access_logs").insert({
       demo_id: demoId,
       user_id: userId,
       ip_address: ipAddress,
