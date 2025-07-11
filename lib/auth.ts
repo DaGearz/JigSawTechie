@@ -273,21 +273,44 @@ export const authService = {
     const user = await this.getCurrentUser();
     if (!user) throw new Error("Not authenticated");
 
-    // Get projects where user is primary client OR has team access
-    const { data, error } = await supabase
+    // Get projects where user is primary client first
+    const { data: ownedProjects, error: ownedError } = await supabase
+      .from("projects")
+      .select("*")
+      .eq("client_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (ownedError) {
+      throw ownedError;
+    }
+
+    // Get projects where user has team access
+    const { data: accessProjects, error: accessError } = await supabase
       .from("projects")
       .select(
         `
         *,
-        user_role:project_access!left(access_level, permissions)
+        project_access!inner(access_level, permissions)
       `
       )
-      .or(`client_id.eq.${user.id},project_access.user_id.eq.${user.id}`)
+      .eq("project_access.user_id", user.id)
       .order("created_at", { ascending: false });
 
-    if (error) {
-      throw error;
+    if (accessError) {
+      console.warn("Could not fetch team access projects:", accessError);
     }
+
+    // Combine both sets of projects, avoiding duplicates
+    const allProjects = [...(ownedProjects || [])];
+    if (accessProjects) {
+      for (const project of accessProjects) {
+        if (!allProjects.find((p) => p.id === project.id)) {
+          allProjects.push(project);
+        }
+      }
+    }
+
+    const data = allProjects;
 
     // Add role information to each project
     const projectsWithRole = (data || []).map((project) => ({
@@ -999,21 +1022,44 @@ export const authService = {
     const user = await this.getCurrentUser();
     if (!user) throw new Error("Not authenticated");
 
-    // Get projects where user is the primary client OR has been granted access
-    const { data, error } = await supabase
+    // Get projects where user is the primary client first
+    const { data: ownedProjects, error: ownedError } = await supabase
+      .from("projects")
+      .select("*")
+      .eq("client_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (ownedError) {
+      throw ownedError;
+    }
+
+    // Get projects where user has team access
+    const { data: accessProjects, error: accessError } = await supabase
       .from("projects")
       .select(
         `
         *,
-        project_access!left(access_level, permissions)
+        project_access!inner(access_level, permissions)
       `
       )
-      .or(`client_id.eq.${user.id},project_access.user_id.eq.${user.id}`)
+      .eq("project_access.user_id", user.id)
       .order("created_at", { ascending: false });
 
-    if (error) {
-      throw error;
+    if (accessError) {
+      console.warn("Could not fetch team access projects:", accessError);
     }
+
+    // Combine both sets of projects, avoiding duplicates
+    const allProjects = [...(ownedProjects || [])];
+    if (accessProjects) {
+      for (const project of accessProjects) {
+        if (!allProjects.find((p) => p.id === project.id)) {
+          allProjects.push(project);
+        }
+      }
+    }
+
+    const data = allProjects;
 
     return data || [];
   },

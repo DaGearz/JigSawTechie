@@ -502,7 +502,29 @@ export class DemoService {
    * Get demos for a specific user (client) - includes team access
    */
   async getUserDemos(userId: string): Promise<DemoProject[]> {
-    const { data, error } = await supabase
+    // Get demos for projects owned by user
+    const { data: ownedDemos, error: ownedError } = await supabase
+      .from("demo_projects")
+      .select(
+        `
+        *,
+        project:projects!inner(
+          id,
+          name,
+          client_id
+        )
+      `
+      )
+      .eq("project.client_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (ownedError) {
+      console.error("Error fetching owned demos:", ownedError);
+      return [];
+    }
+
+    // Get demos for projects where user has team access
+    const { data: accessDemos, error: accessError } = await supabase
       .from("demo_projects")
       .select(
         `
@@ -511,19 +533,28 @@ export class DemoService {
           id,
           name,
           client_id,
-          project_access!left(user_id, access_level, permissions)
+          project_access!inner(user_id, access_level, permissions)
         )
       `
       )
-      .or(
-        `project.client_id.eq.${userId},project.project_access.user_id.eq.${userId}`
-      )
+      .eq("project.project_access.user_id", userId)
       .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching user demos:", error);
-      return [];
+    if (accessError) {
+      console.warn("Could not fetch team access demos:", accessError);
     }
+
+    // Combine both sets of demos, avoiding duplicates
+    const allDemos = [...(ownedDemos || [])];
+    if (accessDemos) {
+      for (const demo of accessDemos) {
+        if (!allDemos.find((d) => d.id === demo.id)) {
+          allDemos.push(demo);
+        }
+      }
+    }
+
+    const data = allDemos;
 
     // Filter demos where user has demo access permissions
     const filteredDemos = (data || []).filter((demo) => {
