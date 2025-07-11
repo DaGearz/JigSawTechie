@@ -1,43 +1,36 @@
 // API route for client demo access
-import { NextRequest, NextResponse } from "next/server";
-import { supabase, supabaseAdmin } from "@/lib/supabase";
+import { NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { supabaseAdmin } from "@/lib/supabase";
 
 // GET /api/client/demos - Get demos for authenticated client
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    // Get user from session with multiple fallback methods
-    let user = null;
-    let authError = null;
-
-    // Method 1: Try session-based auth
-    const sessionResult = await supabase.auth.getUser();
-    if (sessionResult.data?.user) {
-      user = sessionResult.data.user;
-    } else {
-      // Method 2: Try token from Authorization header
-      const authHeader = request.headers.get("authorization");
-      if (authHeader?.startsWith("Bearer ")) {
-        const token = authHeader.substring(7);
-        const tokenResult = await supabase.auth.getUser(token);
-        if (tokenResult.data?.user) {
-          user = tokenResult.data.user;
-        } else {
-          authError = tokenResult.error;
-        }
-      } else {
-        authError = sessionResult.error;
+    // Use SSR client to get authenticated user from cookies
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+        },
       }
-    }
+    );
 
-    if (!user) {
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
       return NextResponse.json(
         {
           error: "Authentication required",
           details: authError?.message || "No user found",
-          debug: {
-            hasAuthHeader: !!request.headers.get("authorization"),
-            sessionError: sessionResult.error?.message,
-          },
         },
         { status: 401 }
       );
