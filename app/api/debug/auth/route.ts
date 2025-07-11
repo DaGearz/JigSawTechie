@@ -41,13 +41,13 @@ export async function GET(request: NextRequest) {
       try {
         const token = authHeader.substring(7);
         debug.token = { provided: true, length: token.length };
-        
+
         const tokenResult = await supabase.auth.getUser(token);
         debug.token.result = {
           user: tokenResult.data?.user || null,
           error: tokenResult.error?.message || null,
         };
-        
+
         if (tokenResult.data?.user && !debug.user) {
           debug.user = tokenResult.data.user;
         }
@@ -77,15 +77,14 @@ export async function GET(request: NextRequest) {
 
     // Test 4: Check if demo_projects table exists
     try {
-      const { data, error } = await supabase
+      const { data, error, count } = await supabase
         .from("demo_projects")
-        .select("count(*)")
-        .limit(1);
-      
+        .select("*", { count: "exact", head: true });
+
       debug.demoTable = {
         exists: !error,
         error: error?.message || null,
-        count: data?.[0]?.count || 0,
+        count: count || 0,
       };
     } catch (error) {
       debug.errors.push(`Demo table check error: ${error}`);
