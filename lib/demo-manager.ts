@@ -133,6 +133,66 @@ export class DemoManager {
   }
 
   /**
+   * Create an external demo record (no file deployment)
+   */
+  async createExternalDemo(request: {
+    project_id: string;
+    demo_name: string;
+    external_url: string;
+    external_description?: string;
+    created_by: string;
+  }): Promise<DemoDeploymentResult> {
+    try {
+      // Generate demo slug for consistency
+      const demoSlug = generateDemoSlug(request.demo_name);
+
+      // Create demo record in database
+      const { data: demoProject, error: demoError } = await supabase
+        .from("demo_projects")
+        .insert({
+          project_id: request.project_id,
+          demo_name: request.demo_name,
+          demo_slug: demoSlug,
+          demo_path: "", // No local path for external demos
+          demo_url: request.external_url, // Use external URL
+          demo_type: "external",
+          external_url: request.external_url,
+          external_description: request.external_description,
+          status: "ready", // External demos are immediately ready
+          build_type: "static", // Default value
+          created_by: request.created_by,
+        })
+        .select()
+        .single();
+
+      if (demoError) {
+        throw new Error(`Failed to create external demo: ${demoError.message}`);
+      }
+
+      // Update project to mark it has a demo
+      await supabase
+        .from("projects")
+        .update({
+          has_demo: true,
+          demo_id: demoProject.id,
+        })
+        .eq("id", request.project_id);
+
+      return {
+        success: true,
+        demo_id: demoProject.id,
+        demo_url: request.external_url,
+      };
+    } catch (error) {
+      console.error("External demo creation error:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
+
+  /**
    * Copy files from local project to demo directory
    */
   private async copyLocalProject(

@@ -10,12 +10,15 @@ export interface DemoProject {
   demo_url: string; // Full URL: jigsawtechie.com/demo/[slug]
   status: DemoStatus;
   build_type: BuildType;
+  demo_type: DemoType; // 'integrated' or 'external'
+  external_url?: string; // External URL for external demos
+  external_description?: string; // Description for external demos
   file_size_mb?: number;
   deployed_at?: string;
   last_updated: string;
   created_at: string;
   created_by: string;
-  
+
   // Joined data
   project?: {
     id: string;
@@ -29,18 +32,22 @@ export interface DemoProject {
   };
 }
 
-export type DemoStatus = 
-  | 'preparing'   // Demo is being set up
-  | 'building'    // Files are being processed
-  | 'ready'       // Demo is live and accessible
-  | 'error'       // Something went wrong
-  | 'archived';   // Demo is no longer active
+export type DemoStatus =
+  | "preparing" // Demo is being set up
+  | "building" // Files are being processed
+  | "ready" // Demo is live and accessible
+  | "error" // Something went wrong
+  | "archived"; // Demo is no longer active
 
-export type BuildType = 
-  | 'static'      // Static HTML/CSS/JS files
-  | 'nextjs'      // Next.js build output
-  | 'react'       // React build output
-  | 'html';       // Simple HTML files
+export type BuildType =
+  | "static" // Static HTML/CSS/JS files
+  | "nextjs" // Next.js build output
+  | "react" // React build output
+  | "html"; // Simple HTML files
+
+export type DemoType =
+  | "integrated" // Hosted on jigsawtechie.com with authentication
+  | "external"; // External link to Vercel/other hosting
 
 export interface DemoAccessLog {
   id: string;
@@ -50,7 +57,7 @@ export interface DemoAccessLog {
   ip_address?: string;
   user_agent?: string;
   session_duration?: number; // in seconds
-  
+
   // Joined data
   demo?: DemoProject;
   user?: {
@@ -68,7 +75,7 @@ export interface DemoPermission {
   granted_by: string;
   granted_at: string;
   expires_at?: string;
-  
+
   // Joined data
   demo?: DemoProject;
   user?: {
@@ -83,10 +90,10 @@ export interface DemoPermission {
   };
 }
 
-export type PermissionType = 
-  | 'view'        // Can view the demo
-  | 'admin'       // Can manage the demo
-  | 'edit';       // Can edit demo settings
+export type PermissionType =
+  | "view" // Can view the demo
+  | "admin" // Can manage the demo
+  | "edit"; // Can edit demo settings
 
 // Demo upload/deployment interfaces
 export interface DemoUploadRequest {
@@ -146,7 +153,7 @@ export interface DemoFile {
   path: string;
   name: string;
   size: number;
-  type: 'file' | 'directory';
+  type: "file" | "directory";
   last_modified: string;
 }
 
@@ -194,14 +201,14 @@ export interface DemoAccessResponse extends DemoApiResponse {
 }
 
 // Utility types
-export type DemoSortField = 
-  | 'created_at'
-  | 'last_updated'
-  | 'demo_name'
-  | 'status'
-  | 'file_size_mb';
+export type DemoSortField =
+  | "created_at"
+  | "last_updated"
+  | "demo_name"
+  | "status"
+  | "file_size_mb";
 
-export type SortOrder = 'asc' | 'desc';
+export type SortOrder = "asc" | "desc";
 
 export interface DemoListFilters {
   status?: DemoStatus[];
@@ -216,7 +223,10 @@ export interface DemoListFilters {
 }
 
 // Demo URL generation
-export const generateDemoUrl = (slug: string, baseUrl: string = 'https://jigsawtechie.com'): string => {
+export const generateDemoUrl = (
+  slug: string,
+  baseUrl: string = "https://jigsawtechie.com"
+): string => {
   return `${baseUrl}/demo/${slug}`;
 };
 
@@ -224,42 +234,59 @@ export const generateDemoUrl = (slug: string, baseUrl: string = 'https://jigsawt
 export const generateDemoSlug = (projectName: string): string => {
   return projectName
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 };
 
 // Demo status helpers
 export const getDemoStatusColor = (status: DemoStatus): string => {
   switch (status) {
-    case 'ready': return 'green';
-    case 'building': return 'blue';
-    case 'preparing': return 'yellow';
-    case 'error': return 'red';
-    case 'archived': return 'gray';
-    default: return 'gray';
+    case "ready":
+      return "green";
+    case "building":
+      return "blue";
+    case "preparing":
+      return "yellow";
+    case "error":
+      return "red";
+    case "archived":
+      return "gray";
+    default:
+      return "gray";
   }
 };
 
 export const getDemoStatusLabel = (status: DemoStatus): string => {
   switch (status) {
-    case 'ready': return 'Live & Ready';
-    case 'building': return 'Building...';
-    case 'preparing': return 'Preparing';
-    case 'error': return 'Error';
-    case 'archived': return 'Archived';
-    default: return 'Unknown';
+    case "ready":
+      return "Live & Ready";
+    case "building":
+      return "Building...";
+    case "preparing":
+      return "Preparing";
+    case "error":
+      return "Error";
+    case "archived":
+      return "Archived";
+    default:
+      return "Unknown";
   }
 };
 
 // Build type helpers
 export const getBuildTypeLabel = (buildType: BuildType): string => {
   switch (buildType) {
-    case 'nextjs': return 'Next.js';
-    case 'react': return 'React';
-    case 'static': return 'Static Files';
-    case 'html': return 'HTML';
-    default: return 'Unknown';
+    case "nextjs":
+      return "Next.js";
+    case "react":
+      return "React";
+    case "static":
+      return "Static Files";
+    case "html":
+      return "HTML";
+    default:
+      return "Unknown";
   }
 };
